@@ -62,6 +62,15 @@ auth.debug('with emoji')
 configure({ emoji: false })
 
 // ---------------------------------------------------------------------------
+H('4b. showScope toggle - hide scope prefix globally')
+E('first line "[Auth] before", second line "after" (no scope prefix), third "[Auth] back" after re-enable')
+auth('before')
+configure({ showScope: false })
+auth('after')
+configure({ showScope: true })
+auth('back')
+
+// ---------------------------------------------------------------------------
 H('5. group / groupEnd')
 E('one collapsible group "[Auth]" containing two child lines')
 auth.group('session block')

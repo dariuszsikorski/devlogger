@@ -16,9 +16,10 @@ const EMOJI: Record<LogLevel, string> = {
  * (objects stay inspectable, not stringified).
  */
 export function buildPrefix(level: LogLevel, scope: string | null): unknown[] {
+  const cfg = getConfig()
   const tokens: string[] = []
-  if (getConfig().emoji) tokens.push(EMOJI[level])
-  if (scope) tokens.push(`[${scope}]`)
+  if (cfg.emoji) tokens.push(EMOJI[level])
+  if (scope && cfg.showScope) tokens.push(`[${scope}]`)
   return tokens.length > 0 ? [tokens.join(' ')] : []
 }
 

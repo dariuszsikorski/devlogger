@@ -35,6 +35,8 @@ export interface Config {
   throttleMs: number
   /** When true, prefix each log line with a level emoji. */
   emoji: boolean
+  /** When true (default), prefix each log line with the registered scope `[Scope]`. */
+  showScope: boolean
   /** Which fields exec() refuses to log without. */
   exec: { required: ExecField[] }
   /** Scopes that are globally silenced. */

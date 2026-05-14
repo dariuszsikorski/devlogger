@@ -5,6 +5,36 @@ Structured, scope-aware console logger built for LLM-readable terminal output. W
 Author: Dariusz Sikorski (https://www.dariuszsikorski.pl)
 License: MIT
 
+## At a glance - how devlogger differs from `console.log`
+
+Same call site, different output. The scope tag (and a per-call counter when bursts collapse) makes terminal output instantly traceable to its source - especially useful for AI agents reading logs to reason about what happened.
+
+```ts
+// Same code on both sides:
+log('Welcome in App!')
+log('user signed in', { id: 42 })
+for (let i = 0; i < 5; i++) log('frame tick')
+```
+
+```text
+console.log                                  devlogger (scope = 'main.ts')
+-----------------------------------          -----------------------------------
+Welcome in App!                              [main.ts] Welcome in App!
+user signed in { id: 42 }                    [main.ts] user signed in { id: 42 }
+frame tick                                   [main.ts] frame tick
+frame tick                                   [main.ts] frame tick (x5)
+frame tick
+frame tick
+frame tick
+```
+
+Scope tags are on by default. Turn them off globally when you don't want them:
+
+```ts
+import { configure } from '@dariuszsikorski/devlogger'
+configure({ showScope: false })
+```
+
 ## Why this exists
 
 `console.log` is fine for humans skimming a stream. It is poor for AI agents that read terminal output trying to reconstruct what happened, and poor for noisy UIs that log the same thing 60 times per second. devlogger keeps the ergonomics of `console` while adding what is missing:
@@ -210,7 +240,7 @@ The IIFE bundle exposes a global named `DevLogger` containing the full module.
 |---|---|
 | `devLog` (default) | Unscoped singleton. Callable + `.log` `.info` `.warn` `.error` `.debug` `.group` `.groupEnd` `.exec` `.mute` `.unmute` |
 | `createDevLog(scope?)` | Build a scoped logger with the same surface |
-| `configure(input)` | Update global config: `enabled`, `throttleMs`, `emoji`, `exec.required`, `mutedScopes`, `mutedLevels` |
+| `configure(input)` | Update global config: `enabled`, `throttleMs`, `emoji`, `showScope`, `exec.required`, `mutedScopes`, `mutedLevels` |
 | `setEnabled(bool)` | Toggle the global kill switch |
 | `isEnabled()` | Current enabled state |
 | `getConfig()` | Read-only view of the active config object |

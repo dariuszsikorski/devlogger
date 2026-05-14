@@ -6,6 +6,7 @@ const config: Config = {
   enabled: detectDev(),
   throttleMs: 200,
   emoji: false,
+  showScope: true,
   exec: { required: [] },
   mutedScopes: new Set<string>(),
   mutedLevels: new Set<LogLevel>(),
@@ -19,6 +20,7 @@ export interface UpdateConfigInput {
   enabled?: boolean
   throttleMs?: number
   emoji?: boolean
+  showScope?: boolean
   exec?: { required?: ExecField[] }
   mutedScopes?: Iterable<string>
   mutedLevels?: Iterable<LogLevel>
@@ -29,6 +31,7 @@ export function configure(input: UpdateConfigInput): void {
   if (typeof input.enabled === 'boolean') config.enabled = input.enabled
   if (typeof input.throttleMs === 'number' && input.throttleMs >= 0) config.throttleMs = input.throttleMs
   if (typeof input.emoji === 'boolean') config.emoji = input.emoji
+  if (typeof input.showScope === 'boolean') config.showScope = input.showScope
   if (input.exec && Array.isArray(input.exec.required)) config.exec.required = [...input.exec.required]
   if (input.mutedScopes) config.mutedScopes = new Set(input.mutedScopes)
   if (input.mutedLevels) config.mutedLevels = new Set(input.mutedLevels)
