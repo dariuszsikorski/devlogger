@@ -50,6 +50,48 @@ log('login attempt', { user: 'ada' })   // -> "[Auth] login attempt { user: 'ada
 log.warn('token expiring')
 ```
 
+### Per-file scope pattern (recommended convention)
+
+Register one scope at the top of every file - that file's name (or the module's role) becomes the tag prepended to every line it emits. The pattern keeps logs traceable to their origin without any caller-detection magic.
+
+```ts
+// auth-service.ts
+import { createDevLog } from '@dariuszsikorski/devlogger'
+const log = createDevLog('AuthService')
+
+export async function login(creds) {
+  log('login start', { user: creds.user })
+  const ok = await verify(creds)
+  if (!ok) { log.warn('login failed'); return null }
+  log.info('login ok')
+  return ok
+}
+```
+
+```ts
+// cart-store.ts
+import { createDevLog } from '@dariuszsikorski/devlogger'
+const log = createDevLog('CartStore')
+
+export function addItem(item) {
+  log('addItem', { sku: item.sku })
+  // ...
+}
+```
+
+Each file declares its own `log` once and uses it everywhere inside. Because every log line carries the file's scope, you can later silence or solo-focus one file globally:
+
+```ts
+import { muteScope } from '@dariuszsikorski/devlogger'
+muteScope('CartStore')  // hides every line from cart-store.ts
+```
+
+Or via startup config:
+
+```ts
+configure({ mutedScopes: ['CartStore', 'Telemetry'] })
+```
+
 ### exec() - call-chain tracking with optional enforcement
 
 ```ts
