@@ -1,5 +1,5 @@
 # devlogger
-Enhanced console.log tool for LLM's
+Enhanced console.log tool for LLMs
 
 Author: Dariusz Sikorski (www.dariuszsikorski.pl)
 
