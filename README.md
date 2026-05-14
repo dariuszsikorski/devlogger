@@ -1,2 +1,6 @@
 # devlogger
-Enhanced console.log tool for LLM's
+Enhanced console.log tool for LLMs
+
+Author: Dariusz Sikorski (https://www.dariuszsikorski.pl)
+
+This project is free to use (see LICENSE) and is meant to help AI agents that read terminal output better understand what is happening in a project thanks to better, structured outputs.
