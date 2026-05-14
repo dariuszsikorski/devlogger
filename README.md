@@ -2,9 +2,6 @@
 
 Structured, scope-aware console logger built for LLM-readable terminal output. Works in Node.js, modern bundlers, and plain browsers from a single import.
 
-Author: Dariusz Sikorski (https://www.dariuszsikorski.pl)
-License: MIT
-
 ## At a glance - how devlogger differs from `console.log`
 
 Same call site, different output. The scope tag (and a per-call counter when bursts collapse) makes terminal output instantly traceable to its source - especially useful for AI agents reading logs to reason about what happened.
@@ -295,3 +292,9 @@ src/
 ```
 
 Files are kept small and single-purpose to make future tests and contributions straightforward.
+
+## Author and license
+
+Dariusz Sikorski - https://www.dariuszsikorski.pl
+
+Released under the MIT License - see [LICENSE](./LICENSE).
