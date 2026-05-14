@@ -137,6 +137,37 @@ Or via startup config:
 configure({ mutedScopes: ['CartStore', 'Telemetry'] })
 ```
 
+### Console passthrough - the rest of `console` works untouched
+
+devlogger is essentially a thin wrapper around `console`. The methods it adds value to (`log` / `info` / `warn` / `error` / `debug` / `group` / `groupEnd`) gain the scope tag, throttling, muting, and subscriber emission. Every other standard `console` method is forwarded as-is, so you do not need to mix `log.info(...)` with `console.table(...)`.
+
+```ts
+const log = createDevLog('Cart')
+
+log.table([{ sku: 'A', qty: 1 }, { sku: 'B', qty: 3 }])  // native console.table grid
+log.time('checkout'); doWork(); log.timeEnd('checkout')  // native timer
+log.count('hits'); log.count('hits')                     // 1, 2
+log.trace('how did we get here?')                        // stack trace
+log.assert(items.length > 0, 'cart should not be empty') // native assert semantics
+log.dir(complexObject)                                   // inspectable dump
+log.clear()
+```
+
+The full surface:
+
+| Method | Behavior in devlogger |
+|---|---|
+| `log` / `info` / `warn` / `error` / `debug` | Wrapped - adds scope tag, throttling, mute checks, subscriber emission |
+| `group` / `groupEnd` | Wrapped - scope tag applied to the group label |
+| `exec` | New - structured call-chain logging (see below) |
+| `mute` / `unmute` | New - per-instance scope toggle |
+| `table` / `dir` / `trace` / `assert` | Forwarded - respects `enabled` and scope mute, no prefix or throttle |
+| `time` / `timeEnd` / `timeLog` | Forwarded - timer labels stay intact |
+| `count` / `countReset` | Forwarded - counter labels stay intact |
+| `clear` | Forwarded |
+
+Forwarded methods skip the `[Scope]` prefix on purpose - prefixing things like timer labels would break them (a label is an identity key). They still respect `setEnabled(false)` and `muteScope(...)`, so silencing a scope hides all of its output regardless of which method produced it.
+
 ### exec() - call-chain tracking with optional enforcement
 
 ```ts
@@ -270,7 +301,7 @@ The IIFE bundle exposes a global named `DevLogger` containing the full module.
 
 | Export | What it does |
 |---|---|
-| `devLog` (default) | Unscoped singleton. Callable + `.log` `.info` `.warn` `.error` `.debug` `.group` `.groupEnd` `.exec` `.mute` `.unmute` |
+| `devLog` (default) | Unscoped singleton. Callable + wrapped `.log/.info/.warn/.error/.debug/.group/.groupEnd`, plus `.exec/.mute/.unmute`, plus forwarded `.table/.dir/.trace/.assert/.time/.timeEnd/.timeLog/.count/.countReset/.clear` |
 | `createDevLog(scope?)` | Build a scoped logger with the same surface |
 | `configure(input)` | Update global config: `enabled`, `throttleMs`, `emoji`, `showScope`, `exec.required`, `mutedScopes`, `mutedLevels` |
 | `setEnabled(bool)` | Toggle the global kill switch |

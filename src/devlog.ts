@@ -19,6 +19,27 @@ export interface DevLog {
   mute: () => void
   unmute: () => void
   readonly scope: string | null
+
+  /** Native console.table, forwarded as-is. Honors `enabled` and scope mute. */
+  table: (tabularData?: unknown, properties?: readonly string[]) => void
+  /** Native console.dir, forwarded as-is. */
+  dir: (item?: unknown, options?: unknown) => void
+  /** Native console.trace, forwarded as-is. */
+  trace: (...args: unknown[]) => void
+  /** Native console.assert, forwarded as-is. Prints only when condition is falsy. */
+  assert: (condition?: boolean, ...args: unknown[]) => void
+  /** Native console.time, forwarded as-is. */
+  time: (label?: string) => void
+  /** Native console.timeEnd, forwarded as-is. */
+  timeEnd: (label?: string) => void
+  /** Native console.timeLog, forwarded as-is. */
+  timeLog: (label?: string, ...data: unknown[]) => void
+  /** Native console.count, forwarded as-is. */
+  count: (label?: string) => void
+  /** Native console.countReset, forwarded as-is. */
+  countReset: (label?: string) => void
+  /** Native console.clear, forwarded as-is. */
+  clear: () => void
 }
 
 /**
@@ -84,6 +105,32 @@ export function createDevLog(scope?: string | null): DevLog {
   callable.unmute = () => {
     if (scopeName) unmuteScope(scopeName)
   }
+
+  // Passthrough for the rest of the console surface.
+  // These respect `enabled` and per-scope mute so silencing a scope hides
+  // every output from it, but they do NOT receive the [Scope] prefix or
+  // throttle - they keep native console semantics (timer labels, table
+  // rendering, assertion behavior etc.).
+  const passthrough = (method: keyof Console) => {
+    return (...args: unknown[]): void => {
+      if (!isEnabled()) return
+      if (isScopeMuted(scopeName)) return
+      const consoleAny = console as unknown as Record<string, (...a: unknown[]) => void>
+      const fn = consoleAny[method as string]
+      if (typeof fn === 'function') fn.apply(console, args)
+    }
+  }
+
+  callable.table = passthrough('table') as DevLog['table']
+  callable.dir = passthrough('dir') as DevLog['dir']
+  callable.trace = passthrough('trace') as DevLog['trace']
+  callable.assert = passthrough('assert') as DevLog['assert']
+  callable.time = passthrough('time') as DevLog['time']
+  callable.timeEnd = passthrough('timeEnd') as DevLog['timeEnd']
+  callable.timeLog = passthrough('timeLog') as DevLog['timeLog']
+  callable.count = passthrough('count') as DevLog['count']
+  callable.countReset = passthrough('countReset') as DevLog['countReset']
+  callable.clear = passthrough('clear') as DevLog['clear']
 
   Object.defineProperty(callable, 'scope', {
     value: scopeName,
