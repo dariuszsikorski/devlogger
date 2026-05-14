@@ -1,6 +1,225 @@
-# devlogger
-Enhanced console.log tool for LLMs
+# @dariuszsikorski/devlogger
+
+Structured, scope-aware console logger built for LLM-readable terminal output. Works in Node.js, modern bundlers, and plain browsers from a single import.
 
 Author: Dariusz Sikorski (https://www.dariuszsikorski.pl)
+License: MIT
 
-This project is free to use (see LICENSE) and is meant to help AI agents that read terminal output better understand what is happening in a project thanks to better, structured outputs.
+## Why this exists
+
+`console.log` is fine for humans skimming a stream. It is poor for AI agents that read terminal output trying to reconstruct what happened, and poor for noisy UIs that log the same thing 60 times per second. devlogger keeps the ergonomics of `console` while adding what is missing:
+
+- Scope tags so logs from different parts of the app are distinguishable at a glance.
+- Intelligent throttling so identical bursts collapse into one line with an `(xN)` counter, while genuinely different lines stay separate.
+- A strict `exec()` form that enforces caller/target tracking when you opt in - useful for tracing call chains across modules.
+- Per-scope and per-level muting so you can silence the noise without commenting out code.
+- A pub/sub subscriber API so an in-app dev panel can render the same stream the terminal sees.
+- Auto dev/prod detection with a manual `setEnabled()` escape hatch.
+
+## Install
+
+```sh
+npm install @dariuszsikorski/devlogger
+# or pnpm / yarn / bun
+```
+
+## Use
+
+### Default singleton (drop-in for `console.log`)
+
+```ts
+import devLog from '@dariuszsikorski/devlogger'
+
+devLog('hello')                // calls console.log
+devLog.info('user signed in', { id: 42 })
+devLog.warn('rate limit close')
+devLog.error(new Error('boom'))
+devLog.debug('frame', 17)
+devLog.group('batch'); devLog.log('a'); devLog.log('b'); devLog.groupEnd()
+```
+
+Calling the logger with no method (`devLog(...)`) is equivalent to `devLog.log(...)` - the surface mirrors `console` exactly, so it is safe to swap in.
+
+### Scoped logger
+
+```ts
+import { createDevLog } from '@dariuszsikorski/devlogger'
+
+const log = createDevLog('Auth')
+log('login attempt', { user: 'ada' })   // -> "[Auth] login attempt { user: 'ada' }"
+log.warn('token expiring')
+```
+
+### exec() - call-chain tracking with optional enforcement
+
+```ts
+const log = createDevLog('Cart')
+
+log.exec({ by: 'CheckoutPage', target: 'addItem', args: { sku: 'X' } })
+
+// Wrap a real function call - logs it, runs it, returns the result.
+const total = log.exec({
+  by: 'CheckoutPage',
+  target: 'computeTotal',
+  args: [items],
+  fn: (xs) => xs.reduce((s, x) => s + x.price, 0),
+})
+```
+
+You can require fields globally - missing fields produce a `console.error` and the call is skipped (the wrapped fn, if any, still runs so app flow never breaks):
+
+```ts
+import { configure } from '@dariuszsikorski/devlogger'
+
+configure({ exec: { required: ['by', 'target'] } })
+```
+
+### Throttling
+
+Throttling is on by default with a 200 ms window. Identical-shape calls within the window are folded:
+
+```ts
+for (let i = 0; i < 50; i++) log('frame', { n: i })
+// terminal:
+//   [Cart] frame { n: 0 }
+//   [Cart] frame { n: 49 } (x50)
+```
+
+"Identical shape" means the same level, same scope, same first-string argument, and the same set of object keys / argument types. Different content prints normally:
+
+```ts
+log('apple'); log('banana'); log('cherry')
+// three separate lines, no merging
+```
+
+Disable or change the window:
+
+```ts
+configure({ throttleMs: 0 })   // off
+configure({ throttleMs: 500 }) // slower window
+```
+
+### Muting
+
+```ts
+import { muteScope, unmuteScope, muteLevel } from '@dariuszsikorski/devlogger'
+
+muteScope('Noisy')        // hide every log from createDevLog('Noisy')
+muteLevel('debug')        // hide all .debug() across scopes
+
+log.mute(); log.unmute()  // per-instance toggle
+```
+
+Configure mutes at startup:
+
+```ts
+configure({
+  mutedScopes: ['Noisy', 'Pings'],
+  mutedLevels: ['debug'],
+})
+```
+
+### Subscribers
+
+Stream every entry to a custom sink - dev panel, file writer, remote log shipper:
+
+```ts
+import { subscribe } from '@dariuszsikorski/devlogger'
+
+const off = subscribe((entry) => {
+  // entry: { level, scope, args, timestamp, count }
+  panel.append(entry)
+})
+
+// later
+off()
+```
+
+### Manual on/off
+
+```ts
+import { setEnabled, isEnabled } from '@dariuszsikorski/devlogger'
+
+setEnabled(false)         // hard kill - nothing emits
+setEnabled(true)
+```
+
+By default, devlogger is enabled. It tries to detect `import.meta.env.DEV` (Vite, modern bundlers) and `process.env.NODE_ENV === 'production'` (Node, Next.js), and disables itself in production builds. When detection cannot decide, it stays on - logs are visible until you explicitly say otherwise.
+
+### Browser via CDN
+
+For pages without a bundler:
+
+```html
+<script src="https://unpkg.com/@dariuszsikorski/devlogger"></script>
+<script>
+  const { default: devLog, createDevLog } = DevLogger
+  devLog('hello from a plain script tag')
+  const log = createDevLog('Page')
+  log.info('ready')
+</script>
+```
+
+The IIFE bundle exposes a global named `DevLogger` containing the full module.
+
+## API reference
+
+| Export | What it does |
+|---|---|
+| `devLog` (default) | Unscoped singleton. Callable + `.log` `.info` `.warn` `.error` `.debug` `.group` `.groupEnd` `.exec` `.mute` `.unmute` |
+| `createDevLog(scope?)` | Build a scoped logger with the same surface |
+| `configure(input)` | Update global config: `enabled`, `throttleMs`, `emoji`, `exec.required`, `mutedScopes`, `mutedLevels` |
+| `setEnabled(bool)` | Toggle the global kill switch |
+| `isEnabled()` | Current enabled state |
+| `getConfig()` | Read-only view of the active config object |
+| `subscribe(handler)` | Attach a listener; returns an unsubscribe fn |
+| `unsubscribeAll()` | Drop every listener |
+| `muteScope(name)` / `unmuteScope(name)` | Per-scope mute |
+| `muteLevel(level)` / `unmuteLevel(level)` | Per-level mute |
+| `getMutedScopes()` / `getMutedLevels()` | Current mute lists |
+| `clearMutes()` | Wipe all mutes |
+| `flushAll(emit?)` | Force-emit any pending throttled summaries |
+| `resetThrottle()` | Drop throttle state without emitting (for tests) |
+
+## Self-test
+
+Every feature has a section in [selftest.mjs](./selftest.mjs). Run it after building:
+
+```sh
+pnpm build
+pnpm selftest
+```
+
+Each section prints `EXPECT:` followed by the actual output, so an LLM (or you) can scan the terminal and confirm behavior without writing assertion-based tests. There is also a CJS smoke (`node selftest.cjs`).
+
+## Build
+
+```sh
+pnpm install
+pnpm build
+```
+
+Outputs:
+
+- `dist/index.mjs` - ESM, for modern bundlers and Node ESM
+- `dist/index.cjs` - CommonJS, for older Node and tooling
+- `dist/index.global.js` - IIFE with global name `DevLogger`, for `<script>` tags
+- `dist/index.d.ts` (+ `.d.cts`) - TypeScript types
+
+## Project layout
+
+```
+src/
+  index.ts        public exports + default singleton
+  devlog.ts       createDevLog factory
+  types.ts        shared type definitions
+  env.ts          dev/prod auto-detection
+  config.ts       global config singleton
+  format.ts       prefix builder + structural arg hash
+  throttle.ts     intelligent batch with (xN) summary
+  mute.ts         scope and level mute registry
+  subscribe.ts    pub/sub
+  exec.ts         exec() with required-field enforcement
+```
+
+Files are kept small and single-purpose to make future tests and contributions straightforward.

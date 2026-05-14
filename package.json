@@ -1,0 +1,57 @@
+{
+  "name": "@dariuszsikorski/devlogger",
+  "version": "0.1.0",
+  "description": "Structured, scope-aware console logger built for LLM-readable terminal output. Works in Node.js, modern bundlers, and plain browsers.",
+  "author": "Dariusz Sikorski (https://www.dariuszsikorski.pl)",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "unpkg": "./dist/index.global.js",
+  "jsdelivr": "./dist/index.global.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.mjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "selftest": "node selftest.mjs",
+    "prepublishOnly": "pnpm build"
+  },
+  "keywords": [
+    "logger",
+    "console",
+    "devlog",
+    "debugging",
+    "browser",
+    "nodejs",
+    "llm",
+    "terminal",
+    "scoped",
+    "throttle"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dariuszsikorski/devlogger.git"
+  },
+  "bugs": "https://github.com/dariuszsikorski/devlogger/issues",
+  "homepage": "https://github.com/dariuszsikorski/devlogger#readme",
+  "devDependencies": {
+    "tsup": "^8.3.5",
+    "typescript": "^5.6.3"
+  },
+  "engines": {
+    "node": ">=14"
+  },
+  "sideEffects": false
+}
