@@ -79,9 +79,35 @@ auth('inside group line 2')
 auth.groupEnd()
 
 // ---------------------------------------------------------------------------
-H('6. exec() - no required fields (default config)')
-E('one line containing "ada -> login | first try"')
-auth.exec({ by: 'ada', target: 'login', msg: 'first try', args: { ip: '1.2.3.4' } })
+H('6. exec() - progressive output, intelligent fallback for missing pieces')
+const main = createDevLog('main.ts')
+E('"main called init" (only by + target)')
+main.exec({ by: 'main', target: 'init' })
+
+E('"main called init with args: { mode: \'dev\' }"  (by + target + args)')
+main.exec({ by: 'main', target: 'init', args: { mode: 'dev' } })
+
+E('"main called init | startup" (by + target + msg, no args)')
+main.exec({ by: 'main', target: 'init', msg: 'startup' })
+
+E('"main called init | startup with args: { mode: \'dev\' }"  (everything)')
+main.exec({ by: 'main', target: 'init', msg: 'startup', args: { mode: 'dev' } })
+
+E('"init"  (only target, no by - drops the "X called" prefix)')
+main.exec({ target: 'init' })
+
+E('"main"  (only by, no target)')
+main.exec({ by: 'main' })
+
+E('"<exec>"  (nothing supplied)')
+main.exec({})
+
+E('NO "with args:" suffix when args is empty {} or []')
+main.exec({ by: 'main', target: 'init', args: {} })
+main.exec({ by: 'main', target: 'init', args: [] })
+
+E('args as array works: "main called sum with args: [ 1, 2, 3 ]"')
+main.exec({ by: 'main', target: 'sum', args: [1, 2, 3] })
 
 // ---------------------------------------------------------------------------
 H('7. exec() - REQUIRED FIELDS enforced')
@@ -90,7 +116,7 @@ E('console.error: "exec() missing required field(s): by, target"')
 auth.exec({ msg: 'forgot the required fields' })
 E('console.error: "exec() missing required field(s): target"')
 auth.exec({ by: 'ada' })
-E('valid call passes: "ada -> logout"')
+E('valid call passes: "ada called logout"')
 auth.exec({ by: 'ada', target: 'logout' })
 configure({ exec: { required: [] } })
 

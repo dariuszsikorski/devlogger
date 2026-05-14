@@ -32,6 +32,24 @@ import { configure } from '@dariuszsikorski/devlogger'
 configure({ showScope: false })
 ```
 
+## Why `exec()` exists - tracing call graphs
+
+`exec()` is a deliberately structured second form of logging. Instead of free-form `log(...)`, you describe the call as `{ by, target, args, msg }`:
+
+```ts
+log.exec({ by: 'main', target: 'init', args: { mode: 'dev' } })
+// -> [main.ts] main called init with args: { mode: 'dev' }
+```
+
+The reason it looks "stiff" is intentional. When an AI agent (or a human) writes logs this way, every line carries the same fields: who called what, with what, why. That regularity lets you do things free-form `console.log` cannot:
+
+- **Reconstruct call trees** from raw log streams - `by` is the parent, `target` is the child.
+- **Subscribe** to the event stream (`subscribe(...)`) and render it live in vis.js, Cytoscape, D3, or any graph library - each entry already has the edge endpoints.
+- **Enforce** the format at file or project level via `configure({ exec: { required: ['by','target'] } })` so contributors (or LLM coders) can't silently drop the tracking fields.
+- **Diff and replay** sessions because the schema is stable.
+
+Use plain `log(...)` for ad-hoc messages. Use `log.exec(...)` whenever you want the call to participate in the call graph or be inspectable as structured data.
+
 ## Why this exists
 
 `console.log` is fine for humans skimming a stream. It is poor for AI agents that read terminal output trying to reconstruct what happened, and poor for noisy UIs that log the same thing 60 times per second. devlogger keeps the ergonomics of `console` while adding what is missing:
@@ -125,6 +143,7 @@ configure({ mutedScopes: ['CartStore', 'Telemetry'] })
 const log = createDevLog('Cart')
 
 log.exec({ by: 'CheckoutPage', target: 'addItem', args: { sku: 'X' } })
+// -> [Cart] CheckoutPage called addItem with args: { sku: 'X' }
 
 // Wrap a real function call - logs it, runs it, returns the result.
 const total = log.exec({
@@ -133,7 +152,23 @@ const total = log.exec({
   args: [items],
   fn: (xs) => xs.reduce((s, x) => s + x.price, 0),
 })
+// -> [Cart] CheckoutPage called computeTotal with args: [ ... ]
+//    (computeTotal is then executed and its return value is returned through)
 ```
+
+The output format adapts to what you supply - missing pieces are dropped gracefully:
+
+```text
+{ by: 'main', target: 'init' }                              -> main called init
+{ by: 'main', target: 'init', args: { mode: 'dev' } }       -> main called init with args: { mode: 'dev' }
+{ by: 'main', target: 'init', msg: 'startup' }              -> main called init | startup
+{ by: 'main', target: 'init', msg: 'x', args: { ... } }     -> main called init | x with args: { ... }
+{ target: 'init' }                                          -> init                       (no "X called")
+{ by: 'main' }                                              -> main
+{}                                                          -> <exec>                     (fallback)
+```
+
+Empty args (`{}` or `[]`) suppress the `with args:` suffix - only meaningful payloads are surfaced. The actual `args` object is passed as a separate console argument so DevTools and Node keep it inspectable instead of stringifying it.
 
 You can require fields globally - missing fields produce a `console.error` and the call is skipped (the wrapped fn, if any, still runs so app flow never breaks):
 

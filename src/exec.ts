@@ -71,10 +71,22 @@ function findMissing(call: ExecCall, required: ExecField[]): ExecField[] {
 }
 
 function describe(call: ExecCall): unknown[] {
-  const parts: string[] = []
-  if (call.by) parts.push(`${call.by} ->`)
-  if (call.target) parts.push(call.target)
-  if (call.msg) parts.push(`| ${call.msg}`)
-  const header = parts.join(' ').trim() || '<exec>'
-  return call.args !== undefined ? [header, call.args] : [header]
+  let header: string
+  if (call.by && call.target) header = `${call.by} called ${call.target}`
+  else if (call.target) header = call.target
+  else if (call.by) header = call.by
+  else header = '<exec>'
+
+  if (call.msg) header += ` | ${call.msg}`
+
+  if (call.args !== undefined && !isEmptyArgs(call.args)) {
+    return [`${header} with args:`, call.args]
+  }
+  return [header]
+}
+
+function isEmptyArgs(args: unknown): boolean {
+  if (Array.isArray(args)) return args.length === 0
+  if (args !== null && typeof args === 'object') return Object.keys(args as Record<string, unknown>).length === 0
+  return false
 }
