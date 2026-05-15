@@ -28,6 +28,15 @@ export interface ExecCall<TArgs extends unknown[] = unknown[], TReturn = unknown
   ctx?: unknown
 }
 
+export interface TransportConfig {
+  /** When false, transport is fully disabled (no connect, no push). Default false. */
+  enabled: boolean
+  /** WebSocket URL of the devlogger-viewer broker, e.g. ws://127.0.0.1:9777/ingest */
+  url: string | null
+  /** Identifier for this producing app; falls back to npm_package_name or 'unknown-app'. */
+  appId: string | null
+}
+
 export interface Config {
   /** When false, all output is suppressed. Auto-detected by default. */
   enabled: boolean
@@ -43,6 +52,8 @@ export interface Config {
   mutedScopes: Set<string>
   /** Levels that are globally silenced. */
   mutedLevels: Set<LogLevel>
+  /** Optional remote transport to the devlogger-viewer broker. */
+  transport: TransportConfig
 }
 
 export type Listener = (entry: LogEntry) => void
