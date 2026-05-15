@@ -5,27 +5,29 @@
   "author": "Dariusz Sikorski (https://www.dariuszsikorski.pl)",
   "license": "MIT",
   "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
-  "unpkg": "./dist/index.global.js",
-  "jsdelivr": "./dist/index.global.js",
+  "main": "./logger/dist/index.cjs",
+  "module": "./logger/dist/index.mjs",
+  "types": "./logger/dist/index.d.ts",
+  "unpkg": "./logger/dist/index.global.js",
+  "jsdelivr": "./logger/dist/index.global.js",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs",
-      "default": "./dist/index.mjs"
+      "types": "./logger/dist/index.d.ts",
+      "import": "./logger/dist/index.mjs",
+      "require": "./logger/dist/index.cjs",
+      "default": "./logger/dist/index.mjs"
     }
   },
   "files": [
-    "dist",
+    "logger/dist",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsup",
-    "selftest": "node selftest.mjs",
+    "build": "tsup --config logger/tsup.config.ts",
+    "selftest": "node logger/selftest.mjs",
+    "viewer": "pnpm --prefix viewer start",
+    "sim": "node simulation/run.mjs",
     "prepublishOnly": "pnpm build"
   },
   "keywords": [

@@ -341,20 +341,46 @@ Outputs:
 - `dist/index.global.js` - IIFE with global name `DevLogger`, for `<script>` tags
 - `dist/index.d.ts` (+ `.d.cts`) - TypeScript types
 
-## Project layout
+## Repository layout
 
 ```
-src/
-  index.ts        public exports + default singleton
-  devlog.ts       createDevLog factory
-  types.ts        shared type definitions
-  env.ts          dev/prod auto-detection
-  config.ts       global config singleton
-  format.ts       prefix builder + structural arg hash
-  throttle.ts     intelligent batch with (xN) summary
-  mute.ts         scope and level mute registry
-  subscribe.ts    pub/sub
-  exec.ts         exec() with required-field enforcement
+logger/         library source + dist (the published `@dariuszsikorski/devlogger` package)
+  src/
+    index.ts        public exports + default singleton
+    devlog.ts       createDevLog factory
+    types.ts        shared type definitions
+    env.ts          dev/prod auto-detection
+    config.ts       global config singleton
+    format.ts       prefix builder + structural arg hash
+    throttle.ts     intelligent batch with (xN) summary
+    mute.ts         scope and level mute registry
+    subscribe.ts    pub/sub
+    exec.ts         exec() with required-field enforcement
+    transport.ts    fire-and-forget WS client to the viewer broker
+  dist/             build artifacts (ESM/CJS/IIFE + .d.ts)
+  selftest.mjs      smoke test
+  tsup.config.ts
+  tsconfig.json
+
+viewer/         local broker + minimal web UI for live log inspection
+  server.ts         Fastify broker - WS /ingest (producers) + WS /stream (consumers) + static UI
+  public/           dark-themed live viewer (search + filter + auto-scroll)
+
+simulation/     end-to-end verification harness
+  handlers/         10 fake modules with realistic call chain
+  run.mjs           sim runner + parity check against the broker
+  headless-consumer.mjs  emulates the browser viewer for CI-style verification
+```
+
+The root `package.json` is the published library; `viewer/` and `simulation/` are dev-only sub-projects with their own scripts and (when needed) their own `node_modules`.
+
+Common scripts from the repository root:
+
+```bash
+pnpm build       # builds logger/dist
+pnpm viewer      # starts broker + auto-opens the web viewer
+pnpm sim         # runs the simulation suite
+pnpm selftest    # quick library self-test
 ```
 
 Files are kept small and single-purpose to make future tests and contributions straightforward.
