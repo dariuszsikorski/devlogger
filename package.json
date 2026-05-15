@@ -26,7 +26,8 @@
   "scripts": {
     "build": "tsup --config logger/tsup.config.ts",
     "selftest": "node logger/selftest.mjs",
-    "viewer": "pnpm --prefix viewer start",
+    "viewer": "tsx viewer/server.ts",
+    "viewer:dev": "tsx watch viewer/server.ts",
     "sim": "node simulation/run.mjs",
     "prepublishOnly": "pnpm build"
   },
@@ -49,7 +50,12 @@
   "bugs": "https://github.com/dariuszsikorski/devlogger/issues",
   "homepage": "https://github.com/dariuszsikorski/devlogger#readme",
   "devDependencies": {
+    "@fastify/static": "^8.0.4",
+    "@fastify/websocket": "^11.0.2",
+    "@types/node": "^22.0.0",
+    "fastify": "^5.3.2",
     "tsup": "^8.3.5",
+    "tsx": "^4.19.0",
     "typescript": "^5.6.3"
   },
   "engines": {
