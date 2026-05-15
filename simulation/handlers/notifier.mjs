@@ -9,7 +9,7 @@ async function sendPush(uid) {
     by: 'notifier.dispatch',
     target: 'fcm.send',
     args: { uid },
-    fn: async () => { await randDelay(20, 60); return { delivered: true } },
+    fn: async () => { await randDelay(100, 300); return { delivered: true } },
   })
 }
 
@@ -18,7 +18,7 @@ async function sendEmail(uid) {
     by: 'notifier.dispatch',
     target: 'sendgrid.send',
     args: { uid },
-    fn: async () => { await randDelay(30, 90); return { queued: true } },
+    fn: async () => { await randDelay(200, 500); return { queued: true } },
   })
 }
 

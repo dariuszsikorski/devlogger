@@ -56,7 +56,7 @@ console.log('[sim] transport status:', transportStatus())
 // Fire N requests with staggered start so the viewer sees scrolling activity.
 const tasks = []
 for (let i = 0; i < REQUESTS; i++) {
-  const delay = i * 150
+  const delay = i * 500
   tasks.push(
     new Promise((resolve) => setTimeout(resolve, delay)).then(() =>
       handleGetProduct({

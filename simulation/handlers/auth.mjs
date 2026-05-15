@@ -10,7 +10,7 @@ export async function verifyToken(token) {
     target: 'auth.lookupUser',
     args: { tokenHead: token.slice(0, 6) },
     fn: async () => {
-      await randDelay(15, 40)
+      await randDelay(80, 200)
       log.info('token valid', { uid: 42 })
       return { uid: 42, role: 'admin' }
     },

@@ -10,7 +10,7 @@ export async function record(event, payload) {
     target: 'auditTable.insert',
     args: { event, uid: payload.uid },
     fn: async () => {
-      await randDelay(5, 15)
+      await randDelay(20, 60)
       log.debug('audit row written', { event })
       return { written: true }
     },

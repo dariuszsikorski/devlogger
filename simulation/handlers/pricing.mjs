@@ -10,7 +10,7 @@ export async function applyDiscount(product, userRole) {
     target: 'rulesEngine.run',
     args: { sku: product.id, role: userRole },
     fn: async () => {
-      await randDelay(8, 22)
+      await randDelay(40, 120)
       const discount = userRole === 'admin' ? 0.2 : 0.05
       const finalPrice = product.price * (1 - discount)
       log.info('discount applied', { discount, finalPrice })

@@ -10,7 +10,7 @@ export async function validatePayload(payload) {
     target: 'zod.parse',
     args: { keys: Object.keys(payload) },
     fn: async () => {
-      await randDelay(1, 5)
+      await randDelay(5, 20)
       try {
         maybeFail(0.05, 'validator')
         return { ok: true }

@@ -10,7 +10,7 @@ export async function build(product, stock) {
     target: 'jsonShape',
     args: { sku: product.id },
     fn: async () => {
-      await randDelay(2, 6)
+      await randDelay(5, 15)
       log.info('response shaped')
       return { product, stock, ts: Date.now() }
     },

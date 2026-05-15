@@ -10,7 +10,7 @@ export async function findProduct(id) {
     target: 'pg.SELECT products',
     args: { id },
     fn: async () => {
-      await randDelay(40, 120)
+      await randDelay(200, 600)
       log.info('rows returned', 1)
       return { id, name: 'Widget', price: 19.99 }
     },

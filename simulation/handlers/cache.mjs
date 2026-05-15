@@ -10,7 +10,7 @@ export async function get(key) {
     target: 'redis.GET',
     args: { key },
     fn: async () => {
-      await randDelay(3, 12)
+      await randDelay(10, 40)
       const hit = Math.random() > 0.5
       log.debug(hit ? 'cache hit' : 'cache miss', { key })
       return hit ? { cached: true, key } : null
