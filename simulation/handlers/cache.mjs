@@ -1,0 +1,19 @@
+﻿// @purpose Fake cache lookup - hit/miss with delay.
+import { createDevLog } from '../../logger/dist/index.mjs'
+import { randDelay } from './util.mjs'
+
+const log = createDevLog('cache')
+
+export async function get(key) {
+  return log.exec({
+    by: 'cache.get',
+    target: 'redis.GET',
+    args: { key },
+    fn: async () => {
+      await randDelay(3, 12)
+      const hit = Math.random() > 0.5
+      log.debug(hit ? 'cache hit' : 'cache miss', { key })
+      return hit ? { cached: true, key } : null
+    },
+  })
+}

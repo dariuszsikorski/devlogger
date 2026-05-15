@@ -1,0 +1,23 @@
+﻿// @purpose Fake validator - quick schema check.
+import { createDevLog } from '../../logger/dist/index.mjs'
+import { randDelay, maybeFail } from './util.mjs'
+
+const log = createDevLog('validator')
+
+export async function validatePayload(payload) {
+  return log.exec({
+    by: 'validator.validatePayload',
+    target: 'zod.parse',
+    args: { keys: Object.keys(payload) },
+    fn: async () => {
+      await randDelay(1, 5)
+      try {
+        maybeFail(0.05, 'validator')
+        return { ok: true }
+      } catch (err) {
+        log.warn('validation soft-failed', err.message)
+        return { ok: false, error: err.message }
+      }
+    },
+  })
+}
