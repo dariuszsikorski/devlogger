@@ -14,7 +14,7 @@
   gap: 6px;
   background: transparent;
   border: none;
-  color: var(--color-neutral);
+  color: var(--color-text-muted);
   padding: 4px 10px;
   border-radius: 4px;
   font: inherit;
@@ -22,15 +22,11 @@
   cursor: pointer;
   transition: background 120ms, color 120ms;
 
-  &[data-hovered]       { color: oklch(0.20 0.005 255); }
+  &[data-hovered]       { color: var(--color-text); }
   &[data-pressed]       { background: var(--surface-plus-2); }
   &[data-focus-visible] { outline: 2px solid var(--color-info); outline-offset: 1px; }
   &[data-selected]      {
     background: var(--surface-plus-2);
     color: var(--color-info);
-  }
-
-  .theme-dark & {
-    &[data-hovered] { color: oklch(0.94 0.005 255); }
   }
 }

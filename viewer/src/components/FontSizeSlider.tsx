@@ -1,7 +1,8 @@
-// @purpose Font size slider - drives html.style.fontSize (rem root), persists, clickable reset indicator.
-import { useEffect, useRef, useState } from 'react'
+// @purpose Font size slider - drives html.style.fontSize (rem root), persists, clickable reset; fill width via --font-slider-fill in themeStyle store.
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Slider, SliderThumb, SliderTrack } from 'react-aria-components'
 import { Type } from 'lucide-react'
+import { updateTheme } from '../themeStyle'
 
 const STORAGE_KEY = 'devlogger.fontsize'
 const MIN     = 9
@@ -19,7 +20,7 @@ function readSaved(): number {
 }
 
 function applyFontSize(size: number) {
-  document.documentElement.style.fontSize = size.toFixed(1) + 'px'
+  updateTheme({ '--root-font-size': size.toFixed(1) + 'px' })
 }
 
 export function FontSizeSlider() {
@@ -32,6 +33,11 @@ export function FontSizeSlider() {
       try { localStorage.setItem(STORAGE_KEY, String(value)) } catch { /* ignore */ }
     }
     isFirstRun.current = false
+  }, [value])
+
+  useLayoutEffect(() => {
+    const pct = ((value - MIN) / (MAX - MIN)) * 100
+    updateTheme({ '--font-slider-fill': `${pct.toFixed(2)}%` })
   }, [value])
 
   const percent = Math.round((value / DEFAULT) * 100)
@@ -49,15 +55,8 @@ export function FontSizeSlider() {
       >
         <Type className="FontSizeSlider_iconSmall" size={10} aria-hidden="true" />
         <SliderTrack className="FontSizeSlider_track">
-          {({ state }) => (
-            <>
-              <span
-                className="FontSizeSlider_fill"
-                style={{ width: `${state.getThumbPercent(0) * 100}%` }}
-              />
-              <SliderThumb className="FontSizeSlider_thumb" />
-            </>
-          )}
+          <span className="FontSizeSlider_fill" />
+          <SliderThumb className="FontSizeSlider_thumb" />
         </SliderTrack>
         <Type className="FontSizeSlider_iconLarge" size={16} aria-hidden="true" />
       </Slider>

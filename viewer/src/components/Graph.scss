@@ -1,4 +1,4 @@
-// @purpose Graph view container - overrides React Flow CSS vars to match viewer theme.
+// @purpose Graph view container - React Flow CSS var overrides + semantic tokens for panel/empty state.
 @use './CallNode.scss';
 @use './ScopeGroup.scss';
 @use './CallEdge.scss';
@@ -11,20 +11,16 @@
 
   .react-flow {
     --xy-background-pattern-dots-color-default: var(--surface-plus-2);
-    --xy-edge-stroke-default:          var(--color-neutral);
+    --xy-edge-stroke-default:          var(--color-text-muted);
     --xy-edge-stroke-selected-default: var(--color-info);
     --xy-edge-stroke-width-default:    1.4;
 
     --xy-controls-button-background-color-default:       var(--surface-plus-2);
     --xy-controls-button-background-color-hover-default: var(--surface-plus-3);
-    --xy-controls-button-color-default:                  oklch(0.20 0.005 255);
+    --xy-controls-button-color-default:                  var(--color-text);
     --xy-controls-button-border-color-default:           var(--surface-minus-2);
 
     --xy-minimap-background-color-default: var(--surface-plus-1);
-  }
-
-  .theme-dark & .react-flow {
-    --xy-controls-button-color-default: oklch(0.94 0.005 255);
   }
 
   .react-flow__attribution { display: none; }
@@ -39,8 +35,6 @@
   padding: 6px 10px;
   font-family: var(--font-mono);
   font-size: 11px;
-
-  .theme-dark & { border-color: var(--surface-plus-3); }
 }
 
 .Graph_layoutPanel {
@@ -56,7 +50,7 @@
 }
 
 .Graph_panelLabel {
-  color: var(--color-neutral);
+  color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   font-size: 10px;
@@ -64,9 +58,7 @@
 
 .Graph_panelValue {
   font-variant-numeric: tabular-nums;
-  color: oklch(0.20 0.005 255);
-
-  .theme-dark & { color: oklch(0.94 0.005 255); }
+  color: var(--color-text);
 }
 
 .Graph_empty {
@@ -82,7 +74,7 @@
   border-radius: 8px;
   padding: 16px 24px;
   max-width: 360px;
-  color: var(--color-neutral);
+  color: var(--color-text-muted);
 
   p { margin: 0; }
 
@@ -94,8 +86,6 @@
     border-radius: 3px;
     color: var(--color-info);
   }
-
-  .theme-dark & { border-color: var(--surface-plus-3); }
 }
 
 .Graph_emptyHint {

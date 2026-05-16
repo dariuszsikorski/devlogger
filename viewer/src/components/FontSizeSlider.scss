@@ -1,4 +1,4 @@
-// @purpose Font size slider - paired with clickable px/percent indicator that resets to default on click.
+// @purpose Font size slider styling - fill via --font-slider-fill var; no inline styles.
 .FontSizeSlider {
   display: inline-flex;
   align-items: center;
@@ -15,7 +15,7 @@
 
 .FontSizeSlider_iconSmall,
 .FontSizeSlider_iconLarge {
-  color: var(--color-neutral);
+  color: var(--color-text-muted);
   flex-shrink: 0;
 }
 
@@ -33,6 +33,7 @@
   top: 0;
   left: 0;
   height: 100%;
+  width: var(--font-slider-fill, 0%);
   background: var(--color-info);
   border-radius: 2px;
   pointer-events: none;
@@ -65,15 +66,17 @@
   border: 1px solid var(--surface-minus-2);
   border-radius: 4px;
   cursor: pointer;
-  color: oklch(0.20 0.005 255);
+  color: var(--color-text);
 
   &:hover         { background: var(--surface-plus-3); }
   &:focus-visible { outline: 2px solid var(--color-info); outline-offset: 1px; }
+}
 
-  .theme-dark & { color: oklch(0.94 0.005 255); }
+.FontSizeSlider_resetPx {
+  /* nominal label */
 }
 
 .FontSizeSlider_resetPct {
-  color: var(--color-neutral);
+  color: var(--color-text-muted);
   font-size: 9.5px;
 }

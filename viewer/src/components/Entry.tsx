@@ -1,4 +1,4 @@
-// @purpose Single log row - colored by level, shows time/level/app/scope/body.
+// @purpose Single log row - colored by level via data-level attribute.
 import { formatTime, formatArgs } from '../utils/format'
 import type { StreamItem } from '../types'
 
@@ -8,11 +8,10 @@ interface EntryProps {
 
 export function Entry({ item }: EntryProps) {
   const e = item.entry
-  const cls = `Entry is-${e.level}`
   const hasCount = e.count > 1
 
   return (
-    <div className={cls}>
+    <div className="Entry" data-level={e.level}>
       <span className="Entry_time">{formatTime(e.timestamp)}</span>
       <span className="Entry_level">{e.level}</span>
       <span className="Entry_app">

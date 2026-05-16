@@ -1,7 +1,8 @@
-// @purpose Brightness slider - sets --surface-base on :root, persists to localStorage.
-import { useEffect, useRef, useState } from 'react'
+// @purpose Brightness slider - writes --surface-base and slider fill percent through themeStyle store, dispatches devlogger:brightness for downstream listeners.
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Slider, SliderOutput, SliderThumb, SliderTrack } from 'react-aria-components'
 import { Moon, Sun } from 'lucide-react'
+import { updateTheme } from '../themeStyle'
 
 const STORAGE_KEY = 'devlogger.brightness'
 const MIN     = 0.10
@@ -19,21 +20,8 @@ function readSaved(): number {
   return DEFAULT
 }
 
-const STYLE_TAG_ID = 'theme-vars'
-
-function ensureThemeStyle(): HTMLStyleElement {
-  let el = document.getElementById(STYLE_TAG_ID) as HTMLStyleElement | null
-  if (!el) {
-    el = document.createElement('style')
-    el.id = STYLE_TAG_ID
-    document.head.appendChild(el)
-  }
-  return el
-}
-
 function applyBrightness(L: number) {
-  ensureThemeStyle().textContent =
-    `:root { --surface-base: oklch(${L.toFixed(3)} 0.005 255) !important; }`
+  updateTheme({ '--surface-base': `oklch(${L.toFixed(3)} 0.005 255)` })
 
   const root = document.documentElement
   root.classList.toggle('theme-dark',  L <  THEME_LIGHT_THRESHOLD)
@@ -54,6 +42,11 @@ export function ThemeSlider() {
     isFirstRun.current = false
   }, [value])
 
+  useLayoutEffect(() => {
+    const pct = ((value - MIN) / (MAX - MIN)) * 100
+    updateTheme({ '--theme-slider-fill': `${pct.toFixed(2)}%` })
+  }, [value])
+
   return (
     <Slider
       className="ThemeSlider"
@@ -64,19 +57,12 @@ export function ThemeSlider() {
       step={0.01}
       aria-label="UI brightness"
     >
-      <Moon className="ThemeSlider_icon" size={12} aria-hidden="true" />
+      <Moon className="ThemeSlider_iconLeft" size={12} aria-hidden="true" />
       <SliderTrack className="ThemeSlider_track">
-        {({ state }) => (
-          <>
-            <span
-              className="ThemeSlider_fill"
-              style={{ width: `${state.getThumbPercent(0) * 100}%` }}
-            />
-            <SliderThumb className="ThemeSlider_thumb" />
-          </>
-        )}
+        <span className="ThemeSlider_fill" />
+        <SliderThumb className="ThemeSlider_thumb" />
       </SliderTrack>
-      <Sun className="ThemeSlider_icon" size={12} aria-hidden="true" />
+      <Sun className="ThemeSlider_iconRight" size={12} aria-hidden="true" />
       <SliderOutput className="ThemeSlider_value">
         {({ state }) => state.getThumbValue(0).toFixed(2)}
       </SliderOutput>

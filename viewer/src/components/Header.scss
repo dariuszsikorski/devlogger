@@ -1,4 +1,4 @@
-// @purpose Header - semantic color tokens; minimal theme-specific overrides only for text/glow.
+// @purpose Header bar - status color via data-state attribute; text colors via semantic tokens.
 .Header {
   display: flex;
   align-items: center;
@@ -20,8 +20,7 @@
   height: 8px;
   border-radius: 50%;
   background: var(--color-info);
-
-  .theme-dark & { box-shadow: 0 0 6px oklch(from var(--color-info) l c h / 0.4); }
+  box-shadow: 0 0 6px oklch(from var(--color-info) l c h / 0.4);
 }
 
 .Header_title {
@@ -29,16 +28,14 @@
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.02em;
-  color: oklch(0.20 0.005 255);
-
-  .theme-dark & { color: oklch(0.94 0.005 255); }
+  color: var(--color-text);
 }
 
 .Header_meta {
   display: flex;
   align-items: center;
   gap: 14px;
-  color: var(--color-neutral);
+  color: var(--color-text-muted);
   font-size: 12px;
 }
 
@@ -48,8 +45,8 @@
   gap: 6px;
   font-variant-numeric: tabular-nums;
 
-  &.is-connected    { color: var(--color-success); }
-  &.is-disconnected { color: var(--color-alert);   }
+  &[data-state="connected"]    { color: var(--color-success); }
+  &[data-state="disconnected"] { color: var(--color-alert);   }
 }
 
 .Header_statusIcon { fill: currentColor; }
@@ -65,7 +62,7 @@
   gap: 6px;
   background: transparent;
   border: 1px solid var(--surface-minus-2);
-  color: oklch(0.20 0.005 255);
+  color: var(--color-text);
   padding: 4px 10px;
   border-radius: 4px;
   font: inherit;
@@ -75,6 +72,4 @@
   &[data-hovered]       { border-color: var(--color-info); color: var(--color-info); }
   &[data-pressed]       { background: var(--surface-plus-2); }
   &[data-focus-visible] { outline: 2px solid var(--color-info); outline-offset: 1px; }
-
-  .theme-dark & { color: oklch(0.94 0.005 255); }
 }

@@ -1,22 +1,13 @@
-// @purpose Edge payload glyph - small wrapped box that flies along the path on fired calls.
+// @purpose Edge payload glyph - parcel-look box that flies along the path on fired calls; uses warning-hue offsets so it stays warm/distinct across themes.
 .CallEdge_payload {
   pointer-events: none;
-  // Lifetime synced with PACKAGE_VISIBLE_MS (3500ms) in useCallGraph - the
-  // element unmounts at the end so an explicit forwards fill keeps it visible
-  // until that moment. NO CSS transform here; it would clash with the SVG
-  // transform applied by <animateMotion>.
   animation: callEdgePayloadFade 3500ms ease-out forwards;
 }
 
 .CallEdge_payloadBox {
-  fill: oklch(0.72 0.16 70);
-  stroke: oklch(0.42 0.18 60);
+  fill: var(--color-warning-plus-1);
+  stroke: var(--color-warning-minus-2);
   stroke-width: 0.6;
-
-  .theme-dark & {
-    fill: oklch(0.78 0.18 80);
-    stroke: oklch(0.30 0.18 60);
-  }
 }
 
 .CallEdge_payloadShadow {
@@ -27,11 +18,9 @@
 
 .CallEdge_payloadStrap,
 .CallEdge_payloadTape {
-  stroke: oklch(0.32 0.16 60);
+  stroke: var(--color-warning-minus-3);
   stroke-width: 1.1;
   stroke-linecap: butt;
-
-  .theme-dark & { stroke: oklch(0.22 0.14 60); }
 }
 
 @keyframes callEdgePayloadFade {

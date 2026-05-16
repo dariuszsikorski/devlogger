@@ -40,17 +40,11 @@ function CallNodeImpl({ data }: NodeProps<CallNodeType>) {
   const hasInfo  = counts.info  > 0
   const hasDebug = counts.debug > 0
 
-  const lastLevel = data.lastLevel || ''
-  const lastSig   = lastLevel ? `is-last-${lastLevel}` : ''
-
-  const cls = [
-    'CallNode',
-    data.isFnNode ? 'is-fn'    : 'is-scope',
-    lastSig,
-  ].filter(Boolean).join(' ')
+  const kind     = data.isFnNode ? 'fn' : 'scope'
+  const lastLevel = data.lastLevel || undefined
 
   return (
-    <div className={cls} ref={ref}>
+    <div className="CallNode" ref={ref} data-kind={kind} data-last={lastLevel}>
       <Handle type="target" position={Position.Top}    className="CallNode_handle" />
       <Handle type="source" position={Position.Bottom} className="CallNode_handle" />
 
@@ -68,10 +62,10 @@ function CallNodeImpl({ data }: NodeProps<CallNodeType>) {
 
       {(hasWarn || hasError || hasInfo || hasDebug) && (
         <div className="CallNode_counters">
-          {hasError && <span className="CallNode_chip is-error" title="errors">err {counts.error}</span>}
-          {hasWarn  && <span className="CallNode_chip is-warn"  title="warnings">warn {counts.warn}</span>}
-          {hasInfo  && <span className="CallNode_chip is-info"  title="info">info {counts.info}</span>}
-          {hasDebug && <span className="CallNode_chip is-debug" title="debug">dbg {counts.debug}</span>}
+          {hasError && <span className="CallNode_chip" data-variant="error" title="errors">err {counts.error}</span>}
+          {hasWarn  && <span className="CallNode_chip" data-variant="warn"  title="warnings">warn {counts.warn}</span>}
+          {hasInfo  && <span className="CallNode_chip" data-variant="info"  title="info">info {counts.info}</span>}
+          {hasDebug && <span className="CallNode_chip" data-variant="debug" title="debug">dbg {counts.debug}</span>}
         </div>
       )}
 

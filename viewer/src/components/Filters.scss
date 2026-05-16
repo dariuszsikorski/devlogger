@@ -1,4 +1,4 @@
-// @purpose Filters - semantic --color-* tokens; minimal theme overrides only for primary text.
+// @purpose Filters bar - semantic --color-* tokens; no theme overrides per element.
 .Filters {
   display: flex;
   gap: 8px;
@@ -20,16 +20,14 @@
     width: 100%;
     background: var(--surface-minus-1);
     border: 1px solid var(--surface-minus-2);
-    color: oklch(0.20 0.005 255);
+    color: var(--color-text);
     padding: 5px 8px 5px 28px;
     border-radius: 4px;
     font: inherit;
 
-    &::placeholder { color: var(--color-neutral); }
+    &::placeholder { color: var(--color-text-muted); }
     &:focus        { outline: none; border-color: var(--color-info); }
   }
-
-  .theme-dark & input { color: oklch(0.94 0.005 255); }
 }
 
 .Filters_searchIcon {
@@ -37,7 +35,7 @@
   left: 8px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--color-neutral);
+  color: var(--color-text-muted);
   pointer-events: none;
 }
 
@@ -51,7 +49,7 @@
   gap: 6px;
   background: var(--surface-minus-1);
   border: 1px solid var(--surface-minus-2);
-  color: oklch(0.20 0.005 255);
+  color: var(--color-text);
   padding: 5px 8px;
   border-radius: 4px;
   font: inherit;
@@ -59,8 +57,6 @@
 
   &[data-hovered]       { border-color: var(--color-info); }
   &[data-focus-visible] { outline: 2px solid var(--color-info); outline-offset: 1px; }
-
-  .theme-dark & { color: oklch(0.94 0.005 255); }
 }
 
 .Filters_popover {
@@ -82,11 +78,9 @@
   padding: 5px 10px;
   border-radius: 4px;
   cursor: pointer;
-  color: oklch(0.20 0.005 255);
+  color: var(--color-text);
   outline: none;
 
   &[data-hovered], &[data-focused] { background: var(--surface-plus-3); }
   &[data-selected]                 { color: var(--color-info); }
-
-  .theme-dark & { color: oklch(0.94 0.005 255); }
 }

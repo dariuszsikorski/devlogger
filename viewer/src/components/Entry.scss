@@ -1,4 +1,4 @@
-// @purpose Entry - level borders + level labels use semantic --color-* tokens written by useSemanticColors.
+// @purpose Entry row - data-level attribute drives border + level label color from semantic tokens.
 .Entry {
   display: grid;
   grid-template-columns: 88px 64px 160px 1fr;
@@ -10,15 +10,15 @@
 
   &:hover { background: var(--surface-plus-1); }
 
-  &.is-log    { border-left-color: var(--color-neutral); }
-  &.is-info   { border-left-color: var(--color-info);    }
-  &.is-warn   { border-left-color: var(--color-warning); }
-  &.is-error  { border-left-color: var(--color-alert);   }
-  &.is-debug  { border-left-color: var(--color-debug);   }
+  &[data-level="log"]   { border-left-color: var(--color-neutral); }
+  &[data-level="info"]  { border-left-color: var(--color-info);    }
+  &[data-level="warn"]  { border-left-color: var(--color-warning); }
+  &[data-level="error"] { border-left-color: var(--color-alert);   }
+  &[data-level="debug"] { border-left-color: var(--color-debug);   }
 }
 
 .Entry_time {
-  color: var(--color-neutral);
+  color: var(--color-text-muted);
   font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
@@ -28,11 +28,11 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
 
-  .Entry.is-log   & { color: var(--color-neutral); }
-  .Entry.is-info  & { color: var(--color-info);    }
-  .Entry.is-warn  & { color: var(--color-warning); }
-  .Entry.is-error & { color: var(--color-alert);   }
-  .Entry.is-debug & { color: var(--color-debug);   }
+  .Entry[data-level="log"]   & { color: var(--color-neutral); }
+  .Entry[data-level="info"]  & { color: var(--color-info);    }
+  .Entry[data-level="warn"]  & { color: var(--color-warning); }
+  .Entry[data-level="error"] & { color: var(--color-alert);   }
+  .Entry[data-level="debug"] & { color: var(--color-debug);   }
 }
 
 .Entry_app {
@@ -44,16 +44,14 @@
 }
 
 .Entry_scope {
-  color: var(--color-neutral);
+  color: var(--color-text-muted);
   font-size: 11px;
 }
 
 .Entry_body {
   white-space: pre-wrap;
   word-break: break-word;
-  color: oklch(0.20 0.005 255);
-
-  .theme-dark & { color: oklch(0.94 0.005 255); }
+  color: var(--color-text);
 }
 
 .Entry_count {

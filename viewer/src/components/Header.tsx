@@ -22,9 +22,9 @@ export function Header({
   view,
   onViewChange,
 }: HeaderProps) {
-  const statusClass = 'Header_status ' + (isConnected ? 'is-connected' : 'is-disconnected')
-  const statusText = isConnected ? 'connected' : 'disconnected'
-  const isGraph = view === 'graph'
+  const statusState = isConnected ? 'connected' : 'disconnected'
+  const statusText  = statusState
+  const isGraph     = view === 'graph'
 
   return (
     <header className="Header">
@@ -38,7 +38,7 @@ export function Header({
         <FontSizeSlider />
         <ThemeSlider />
 
-        <span className={statusClass}>
+        <span className="Header_status" data-state={statusState}>
           <Circle className="Header_statusIcon" size={8} />
           {statusText}
         </span>

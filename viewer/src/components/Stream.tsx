@@ -46,7 +46,7 @@ export function Stream({ items }: StreamProps) {
   }, [items])
 
   return (
-    <main className={`Stream ${isEmpty ? 'is-empty' : ''}`} ref={ref} onScroll={handleScroll}>
+    <main className="Stream" data-state={isEmpty ? 'empty' : 'live'} ref={ref} onScroll={handleScroll}>
       {visible.map((item, i) => (
         <Entry key={i} item={item} />
       ))}

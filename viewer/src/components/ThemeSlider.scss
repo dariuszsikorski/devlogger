@@ -1,4 +1,4 @@
-// @purpose Brightness slider - uses semantic --color-* tokens written by useSemanticColors; no more theme overrides per element.
+// @purpose Brightness slider styling - fill width comes from --theme-slider-fill var set by the component, no inline styles, no theme overrides per element.
 .ThemeSlider {
   display: inline-flex;
   align-items: center;
@@ -10,14 +10,15 @@
 .ThemeSlider_value {
   font-family: var(--font-mono);
   font-size: 11px;
-  color: var(--color-neutral);
+  color: var(--color-text-muted);
   font-variant-numeric: tabular-nums;
   min-width: 28px;
   text-align: right;
 }
 
-.ThemeSlider_icon {
-  color: var(--color-neutral);
+.ThemeSlider_iconLeft,
+.ThemeSlider_iconRight {
+  color: var(--color-text-muted);
   flex-shrink: 0;
 }
 
@@ -35,6 +36,7 @@
   top: 0;
   left: 0;
   height: 100%;
+  width: var(--theme-slider-fill, 0%);
   background: var(--color-info);
   border-radius: 2px;
   pointer-events: none;
@@ -45,15 +47,11 @@
   height: 12px;
   top: 50%;
   border-radius: 50%;
-  background: oklch(0.20 0.005 255);
+  background: var(--color-text);
   border: 2px solid var(--color-info);
   transition: transform 120ms;
 
   &[data-hovered]       { transform: scale(1.15); }
   &[data-dragging]      { transform: scale(1.3); }
   &[data-focus-visible] { outline: 2px solid var(--color-info); outline-offset: 2px; }
-
-  .theme-dark & {
-    background: oklch(0.94 0.005 255);
-  }
 }

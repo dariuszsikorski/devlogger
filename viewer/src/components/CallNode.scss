@@ -1,6 +1,6 @@
-// @purpose Custom node visuals - function/scope card with pulsing border on fire. Semantic --color-* tokens.
+// @purpose Graph node card - data-kind drives pulse hue, data-last colors recent-event burst, chip variant via data-variant.
 .CallNode {
-  --pulse-color: var(--color-success);
+  --pulse-color: var(--color-info);
   --node-border: var(--surface-minus-2);
 
   background: var(--surface-plus-1);
@@ -10,22 +10,16 @@
   min-width: 200px;
   max-width: 240px;
   font-family: var(--font-mono);
-  color: oklch(0.20 0.005 255);
+  color: var(--color-text);
   transition: background 120ms, border-color 120ms;
 
-  .theme-dark & {
-    color: oklch(0.94 0.005 255);
-    background: var(--surface-plus-1);
-    --node-border: var(--surface-plus-2);
-  }
+  &[data-kind="fn"]    { --pulse-color: var(--color-info);    }
+  &[data-kind="scope"] { --pulse-color: var(--color-warning); }
 
-  &.is-fn    { --pulse-color: var(--color-info);    }
-  &.is-scope { --pulse-color: var(--color-warning); }
-
-  &.is-last-warn  { --pulse-color: var(--color-warning); }
-  &.is-last-error { --pulse-color: var(--color-alert);   }
-  &.is-last-info  { --pulse-color: var(--color-info);    }
-  &.is-last-debug { --pulse-color: var(--color-debug);   }
+  &[data-last="warn"]  { --pulse-color: var(--color-warning); }
+  &[data-last="error"] { --pulse-color: var(--color-alert);   }
+  &[data-last="info"]  { --pulse-color: var(--color-info);    }
+  &[data-last="debug"] { --pulse-color: var(--color-debug);   }
 }
 
 .CallNode_header {
@@ -36,12 +30,12 @@
   font-size: 10px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--color-neutral);
+  color: var(--color-text-muted);
 }
 
 .CallNode_callCount {
   font-variant-numeric: tabular-nums;
-  color: var(--color-neutral);
+  color: var(--color-text-muted);
 }
 
 .CallNode_label {
@@ -51,8 +45,8 @@
   word-break: break-word;
   line-height: 1.3;
 
-  .CallNode.is-scope & {
-    color: var(--color-neutral);
+  .CallNode[data-kind="scope"] & {
+    color: var(--color-text-muted);
     font-style: italic;
   }
 }
@@ -72,16 +66,16 @@
   font-variant-numeric: tabular-nums;
   background: var(--surface-minus-1);
 
-  &.is-error { color: var(--color-alert);   background: oklch(from var(--color-alert)   l c h / 0.12); }
-  &.is-warn  { color: var(--color-warning); background: oklch(from var(--color-warning) l c h / 0.14); }
-  &.is-info  { color: var(--color-info);    background: oklch(from var(--color-info)    l c h / 0.10); }
-  &.is-debug { color: var(--color-debug);   background: oklch(from var(--color-debug)   l c h / 0.10); }
+  &[data-variant="error"] { color: var(--color-alert);   background: oklch(from var(--color-alert)   l c h / 0.12); }
+  &[data-variant="warn"]  { color: var(--color-warning); background: oklch(from var(--color-warning) l c h / 0.14); }
+  &[data-variant="info"]  { color: var(--color-info);    background: oklch(from var(--color-info)    l c h / 0.10); }
+  &[data-variant="debug"] { color: var(--color-debug);   background: oklch(from var(--color-debug)   l c h / 0.10); }
 }
 
 .CallNode_lastMessage {
   margin-top: 5px;
   font-size: 10.5px;
-  color: var(--color-neutral);
+  color: var(--color-text-muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -96,7 +90,6 @@
   .theme-dark & { border-color: var(--surface-plus-4); }
 }
 
-// Edge animation override when our hook marks the edge .is-hot.
 .react-flow__edge.is-hot .react-flow__edge-path {
   stroke: var(--color-success);
   stroke-width: 2;

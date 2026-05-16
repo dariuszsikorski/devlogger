@@ -9,7 +9,7 @@
   font-family: var(--font-mono);
   font-size: 12.5px;
 
-  &.is-empty { opacity: 0.55; }
+  &[data-state="empty"] { opacity: 0.55; }
 
   &::-webkit-scrollbar       { width: 10px; }
   &::-webkit-scrollbar-track { background: transparent; }

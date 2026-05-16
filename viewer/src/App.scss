@@ -1,6 +1,4 @@
-// @purpose Root tokens - ONLY surface system (--surface-base + 10 offsets).
-// All chromatic/text colors are hardcoded inline in component SCSS files,
-// with `.theme-dark &` overrides for the dark variant.
+// @purpose Root - imports component sheets and defines surface offsets derived from --surface-base. Chromatic tokens (--color-*, --color-text, --color-text-muted) come from themeStyle store at runtime.
 @use './components/ThemeSlider.scss';
 @use './components/FontSizeSlider.scss';
 @use './components/Header.scss';
@@ -14,12 +12,9 @@
 :root {
   color-scheme: light dark;
 
-  // Surface - JS slider updates --surface-base, CSS derives 10 offsets.
+  // Fallback surface base - real value is written into <style id="theme-vars"> by ThemeSlider.
   --surface-base: oklch(0.18 0.005 255);
 
-  // 9 stops each side - gentle exponential, finer-grained than linear.
-  // From base=0.15, plus-9 reaches ~0.90 (near-white).
-  // From base=0.95, minus-9 reaches ~0.20 (near-black). clamp() saturates at 0/1.
   --surface-minus-1: oklch(from var(--surface-base) clamp(0, calc(l - 0.02), 1) c h);
   --surface-minus-2: oklch(from var(--surface-base) clamp(0, calc(l - 0.05), 1) c h);
   --surface-minus-3: oklch(from var(--surface-base) clamp(0, calc(l - 0.09), 1) c h);
@@ -40,8 +35,16 @@
   --surface-plus-8:  oklch(from var(--surface-base) clamp(0, calc(l + 0.54), 1) c h);
   --surface-plus-9:  oklch(from var(--surface-base) clamp(0, calc(l + 0.75), 1) c h);
 
+  // Static fallbacks - themeStyle store overrides these dynamically.
+  --color-text:        oklch(0.94 0.005 255);
+  --color-text-muted:  oklch(0.65 0.005 255);
+
   --font-ui:   ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, "Cascadia Mono", Menlo, Consolas, monospace;
+}
+
+html {
+  font-size: var(--root-font-size, 13px);
 }
 
 * { box-sizing: border-box; }
@@ -52,11 +55,7 @@ body {
   font-family: var(--font-ui);
   font-size: 13px;
   background: var(--surface-base);
-  color: oklch(0.20 0.005 255);
-
-  .theme-dark & {
-    color: oklch(0.94 0.005 255);
-  }
+  color: var(--color-text);
 }
 
 .App {
