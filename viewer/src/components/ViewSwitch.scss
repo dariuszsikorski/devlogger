@@ -1,0 +1,40 @@
+// @purpose Two-segment view toggle, default light theme + .theme-dark & overrides.
+.ViewSwitch {
+  display: inline-flex;
+  background: var(--surface-minus-1);
+  border: 1px solid var(--surface-minus-2);
+  border-radius: 6px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.ViewSwitch_button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  color: oklch(0.50 0.005 255);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font: inherit;
+  font-size: 11.5px;
+  cursor: pointer;
+  transition: background 120ms, color 120ms;
+
+  &[data-hovered]       { color: oklch(0.20 0.005 255); }
+  &[data-pressed]       { background: var(--surface-plus-2); }
+  &[data-focus-visible] { outline: 2px solid oklch(0.50 0.22 245); outline-offset: 1px; }
+  &[data-selected]      {
+    background: var(--surface-plus-2);
+    color: oklch(0.50 0.22 245);
+  }
+
+  .theme-dark & {
+    color: oklch(0.65 0.005 255);
+
+    &[data-hovered]       { color: oklch(0.94 0.005 255); }
+    &[data-focus-visible] { outline-color: oklch(0.75 0.20 245); }
+    &[data-selected]      { color: oklch(0.75 0.20 245); }
+  }
+}

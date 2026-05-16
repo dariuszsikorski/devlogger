@@ -1,0 +1,117 @@
+// @purpose Graph view container - overrides React Flow CSS vars to match viewer theme.
+@use './CallNode.scss';
+@use './ScopeGroup.scss';
+@use './CallEdge.scss';
+
+.Graph {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+  background: var(--surface-base);
+
+  .react-flow {
+    --xy-background-pattern-dots-color-default: var(--surface-plus-2);
+    --xy-edge-stroke-default:          oklch(0.55 0.005 255);
+    --xy-edge-stroke-selected-default: oklch(0.50 0.22 245);
+    --xy-edge-stroke-width-default:    1.4;
+
+    --xy-controls-button-background-color-default:       var(--surface-plus-2);
+    --xy-controls-button-background-color-hover-default: var(--surface-plus-3);
+    --xy-controls-button-color-default:                  oklch(0.20 0.005 255);
+    --xy-controls-button-border-color-default:           var(--surface-minus-2);
+
+    --xy-minimap-background-color-default: var(--surface-plus-1);
+  }
+
+  .theme-dark & .react-flow {
+    --xy-edge-stroke-default:          oklch(0.65 0.005 255);
+    --xy-edge-stroke-selected-default: oklch(0.75 0.20 245);
+    --xy-controls-button-color-default: oklch(0.94 0.005 255);
+  }
+
+  .react-flow__attribution { display: none; }
+}
+
+.Graph_panel {
+  display: flex;
+  gap: 12px;
+  background: var(--surface-plus-1);
+  border: 1px solid var(--surface-minus-2);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+
+  .theme-dark & {
+    border-color: var(--surface-plus-3);
+  }
+}
+
+.Graph_layoutPanel {
+  // Float the layout chooser top-right inside the canvas.
+  background: transparent;
+  padding: 0;
+  border: 0;
+}
+
+.Graph_panelMetric {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.Graph_panelLabel {
+  color: oklch(0.50 0.005 255);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 10px;
+
+  .theme-dark & { color: oklch(0.65 0.005 255); }
+}
+
+.Graph_panelValue {
+  font-variant-numeric: tabular-nums;
+  color: oklch(0.20 0.005 255);
+
+  .theme-dark & { color: oklch(0.94 0.005 255); }
+}
+
+.Graph_empty {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 5;
+  text-align: center;
+  background: var(--surface-plus-1);
+  border: 1px solid var(--surface-minus-2);
+  border-radius: 8px;
+  padding: 16px 24px;
+  max-width: 360px;
+  color: oklch(0.40 0.005 255);
+
+  p { margin: 0; }
+
+  code {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    background: var(--surface-minus-1);
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: oklch(0.50 0.22 245);
+  }
+
+  .theme-dark & {
+    color: oklch(0.75 0.005 255);
+    border-color: var(--surface-plus-3);
+
+    code { color: oklch(0.75 0.20 245); }
+  }
+}
+
+.Graph_emptyHint {
+  margin-top: 6px;
+  font-size: 11px;
+  opacity: 0.75;
+}

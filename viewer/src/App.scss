@@ -6,6 +6,9 @@
 @use './components/Filters.scss';
 @use './components/Stream.scss';
 @use './components/Entry.scss';
+@use './components/ViewSwitch.scss';
+@use './components/LayoutSwitch.scss';
+@use './components/Graph.scss';
 
 :root {
   color-scheme: light dark;

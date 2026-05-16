@@ -1,0 +1,63 @@
+// @purpose Scope group frame - title bar at top, dashed border, fills RF node bounds.
+.ScopeGroup {
+  width: 100%;
+  height: 100%;
+  background: var(--surface-minus-1);
+  border: 1px dashed var(--surface-minus-3);
+  border-radius: 10px;
+  padding-top: 0;
+  position: relative;
+
+  .theme-dark & {
+    background: oklch(from var(--surface-base) clamp(0, calc(l + 0.015), 1) c h);
+    border-color: var(--surface-plus-3);
+  }
+}
+
+.ScopeGroup_header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+  padding: 0 12px;
+  background: var(--surface-plus-2);
+  border-bottom: 1px solid var(--surface-minus-2);
+  border-radius: 10px 10px 0 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: oklch(0.20 0.005 255);
+  cursor: grab;
+
+  .theme-dark & {
+    color: oklch(0.94 0.005 255);
+    background: var(--surface-plus-2);
+    border-bottom-color: var(--surface-plus-3);
+  }
+}
+
+.ScopeGroup_dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: oklch(0.50 0.22 245);
+  flex-shrink: 0;
+
+  .theme-dark & { background: oklch(0.75 0.20 245); }
+}
+
+.ScopeGroup_title {
+  flex: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ScopeGroup_count {
+  font-variant-numeric: tabular-nums;
+  color: oklch(0.50 0.005 255);
+  font-size: 10px;
+
+  .theme-dark & { color: oklch(0.65 0.005 255); }
+}

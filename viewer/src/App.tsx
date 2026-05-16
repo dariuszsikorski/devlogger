@@ -1,10 +1,12 @@
-// @purpose Root - holds entry buffer + filter state, wires WS to filtered stream.
+// @purpose Root - holds entry buffer + filter state, switches between Stream and Graph views.
 import { useCallback, useMemo, useState } from 'react'
 import { Header } from './components/Header'
 import { Filters } from './components/Filters'
 import { Stream } from './components/Stream'
+import { Graph } from './components/Graph'
 import { useStream } from './hooks/useStream'
 import { formatArgs } from './utils/format'
+import type { ViewKey } from './components/ViewSwitch'
 import type { StreamItem } from './types'
 
 const MAX_ENTRIES = 2000
@@ -16,6 +18,7 @@ export function App() {
   const [search, setSearch] = useState('')
   const [appFilter, setAppFilter] = useState('')
   const [levelFilter, setLevelFilter] = useState('')
+  const [view, setView] = useState<ViewKey>('stream')
 
   const onBatch = useCallback((items: StreamItem[]) => {
     setEntries((prev) => {
@@ -48,6 +51,8 @@ export function App() {
 
   const handleClear = useCallback(() => setEntries([]), [])
 
+  const isGraph = view === 'graph'
+
   return (
     <div className="App">
       <Header
@@ -55,17 +60,21 @@ export function App() {
         visibleCount={visible.length}
         totalCount={entries.length}
         onClear={handleClear}
+        view={view}
+        onViewChange={setView}
       />
-      <Filters
-        search={search}
-        appFilter={appFilter}
-        levelFilter={levelFilter}
-        apps={apps}
-        onSearchChange={setSearch}
-        onAppChange={setAppFilter}
-        onLevelChange={setLevelFilter}
-      />
-      <Stream items={visible} />
+      {!isGraph && (
+        <Filters
+          search={search}
+          appFilter={appFilter}
+          levelFilter={levelFilter}
+          apps={apps}
+          onSearchChange={setSearch}
+          onAppChange={setAppFilter}
+          onLevelChange={setLevelFilter}
+        />
+      )}
+      {isGraph ? <Graph entries={entries} /> : <Stream items={visible} />}
     </div>
   )
 }
