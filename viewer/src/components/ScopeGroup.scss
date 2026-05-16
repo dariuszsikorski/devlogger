@@ -1,4 +1,4 @@
-// @purpose Scope group frame - semantic tokens; theme-dark only used for surface tone tweak.
+// @purpose Scope group frame - wszystkie wymiary i fonty w PX, niezalezne od font-slidera (graph stabilny pikselowo).
 .ScopeGroup {
   width: 100%;
   height: 100%;
@@ -7,11 +7,6 @@
   border-radius: 10px;
   padding-top: 0;
   position: relative;
-
-  .theme-dark & {
-    background: oklch(from var(--surface-base) clamp(0, calc(l + 0.015), 1) c h);
-    border-color: var(--surface-plus-3);
-  }
 }
 
 .ScopeGroup_header {
@@ -22,13 +17,11 @@
   padding: 0 12px;
   background: var(--surface-plus-2);
   border-bottom: 1px solid var(--surface-minus-2);
+  box-shadow: inset 0 -1px var(--surface-plus-3);
   border-radius: 10px 10px 0 0;
   font-family: var(--font-mono);
   font-size: 11px;
-  color: var(--color-text);
   cursor: grab;
-
-  .theme-dark & { border-bottom-color: var(--surface-plus-3); }
 }
 
 .ScopeGroup_dot {

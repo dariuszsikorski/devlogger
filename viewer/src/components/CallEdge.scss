@@ -1,4 +1,4 @@
-// @purpose Edge payload glyph - parcel-look box that flies along the path on fired calls; uses warning-hue offsets so it stays warm/distinct across themes.
+// @purpose Edge payload glyph - parcel-look box, warning-hue offsets. Cien wyliczany z surface-base zeby skalowal sie z motywem.
 .CallEdge_payload {
   pointer-events: none;
   animation: callEdgePayloadFade 3500ms ease-out forwards;
@@ -11,9 +11,7 @@
 }
 
 .CallEdge_payloadShadow {
-  fill: oklch(0 0 0 / 0.30);
-
-  .theme-dark & { fill: oklch(0 0 0 / 0.55); }
+  fill: oklch(from var(--surface-base) clamp(0, calc(l - 0.18), 1) c h / 0.55);
 }
 
 .CallEdge_payloadStrap,

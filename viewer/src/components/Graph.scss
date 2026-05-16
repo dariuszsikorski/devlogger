@@ -1,4 +1,5 @@
-// @purpose Graph view container - React Flow CSS var overrides + semantic tokens for panel/empty state.
+// @purpose Graph view - React Flow CSS var overrides + semantic tokens dla paneli i empty-state.
+// WSZYSTKIE wymiary w PX (panele, fonty, paddingi) - graph nie skaluje sie z font-sliderem, layouty operuja na px constants.
 @use './CallNode.scss';
 @use './ScopeGroup.scss';
 @use './CallEdge.scss';
@@ -12,7 +13,7 @@
   .react-flow {
     --xy-background-pattern-dots-color-default: var(--surface-plus-2);
     --xy-edge-stroke-default:          var(--color-text-muted);
-    --xy-edge-stroke-selected-default: var(--color-info);
+    --xy-edge-stroke-selected-default: var(--color-accent);
     --xy-edge-stroke-width-default:    1.4;
 
     --xy-controls-button-background-color-default:       var(--surface-plus-2);
@@ -58,7 +59,6 @@
 
 .Graph_panelValue {
   font-variant-numeric: tabular-nums;
-  color: var(--color-text);
 }
 
 .Graph_empty {
@@ -75,6 +75,7 @@
   padding: 16px 24px;
   max-width: 360px;
   color: var(--color-text-muted);
+  font-size: 12px;
 
   p { margin: 0; }
 
@@ -91,5 +92,5 @@
 .Graph_emptyHint {
   margin-top: 6px;
   font-size: 11px;
-  opacity: 0.75;
+  color: var(--color-text-muted);
 }
