@@ -1,75 +1,81 @@
-// @purpose Header bar - status color via data-state attribute; text colors via semantic tokens.
+// @purpose Header bar - surface-plus-1 panel z embossed bottom border, focus rings na --color-accent, status z koloru semantycznego.
 .Header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 16px;
+  gap: 0.75rem;
+  padding: 0.6rem 1rem;
   background: var(--surface-plus-1);
-  border-bottom: 1px solid var(--surface-minus-1);
-  box-shadow: inset 0 -1px var(--surface-plus-2);
+  border-bottom: 1px solid var(--surface-minus-3);
+  box-shadow: inset 0 -1px var(--surface-plus-2), 0 4px 12px oklch(from var(--surface-base) clamp(0, calc(l - 0.12), 1) c h / 0.35);
+  color: var(--color-text);
 }
 
 .Header_brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 0.75rem;
 }
 
 .Header_dot {
-  width: 8px;
-  height: 8px;
+  width: 0.5rem;
+  height: 0.5rem;
   border-radius: 50%;
-  background: var(--color-info);
-  box-shadow: 0 0 6px oklch(from var(--color-info) l c h / 0.4);
+  background: var(--color-accent);
+  box-shadow: 0 0 0.4rem oklch(from var(--color-accent) l c h / 0.4);
 }
 
 .Header_title {
   margin: 0;
-  font-size: 13px;
+  font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 0.02em;
-  color: var(--color-text);
 }
 
 .Header_meta {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 0.9rem;
   color: var(--color-text-muted);
-  font-size: 12px;
+  font-size: 0.78rem;
 }
 
 .Header_status {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 0.4rem;
   font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
 
-  &[data-state="connected"]    { color: var(--color-success); }
-  &[data-state="disconnected"] { color: var(--color-alert);   }
+  &[data-state="connected"]    { color: var(--color-success); background: oklch(from var(--color-success) l c h / 0.14); border-color: oklch(from var(--color-success) l c h / 0.35); }
+  &[data-state="disconnected"] { color: var(--color-alert);   background: oklch(from var(--color-alert)   l c h / 0.14); border-color: oklch(from var(--color-alert)   l c h / 0.40); }
 }
 
 .Header_statusIcon { fill: currentColor; }
 
 .Header_count {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 0.72rem;
 }
 
 .Header_clear {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: transparent;
+  gap: 0.4rem;
+  background: var(--surface-plus-2);
   border: 1px solid var(--surface-minus-2);
+  // color z buttona resetuje meta-muted → musi byc jawnie, bo <Header_meta> ustawia muted
   color: var(--color-text);
-  padding: 4px 10px;
-  border-radius: 4px;
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
   font: inherit;
   cursor: pointer;
   transition: border-color 120ms, color 120ms, background 120ms;
 
-  &[data-hovered]       { border-color: var(--color-info); color: var(--color-info); }
-  &[data-pressed]       { background: var(--surface-plus-2); }
-  &[data-focus-visible] { outline: 2px solid var(--color-info); outline-offset: 1px; }
+  &[data-hovered]       { background: var(--surface-plus-3); border-color: var(--color-accent); color: var(--color-accent); }
+  &[data-pressed]       { background: var(--surface-plus-4); }
+  &[data-focus-visible] { outline: 2px solid var(--color-accent); outline-offset: 1px; }
 }

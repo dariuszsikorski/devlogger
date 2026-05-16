@@ -1,15 +1,13 @@
-// @purpose Stream - surface only, no chromatic. Same in both themes.
+// @purpose Stream - rem-based, skaluje sie z --root-font-size.
 .Stream {
   flex: 1;
   overflow-y: auto;
-  padding: 8px 16px 16px;
+  padding: 0.5rem 1rem 1rem;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0.15rem;
   font-family: var(--font-mono);
-  font-size: 12.5px;
-
-  &[data-state="empty"] { opacity: 0.55; }
+  font-size: 0.85rem;
 
   &::-webkit-scrollbar       { width: 10px; }
   &::-webkit-scrollbar-track { background: transparent; }

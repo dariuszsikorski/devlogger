@@ -1,14 +1,14 @@
-// @purpose Entry row - data-level attribute drives border + level label color from semantic tokens.
+// @purpose Entry row - level label w stylu Card-alert-pill: kolor + bg same-hue translucent + border. Boost percepcji koloru jak w proto-hello.
 .Entry {
   display: grid;
-  grid-template-columns: 88px 64px 160px 1fr;
-  gap: 10px;
-  padding: 4px 8px;
+  grid-template-columns: 6.8rem 5.6rem 12.3rem 1fr;
+  gap: 0.6rem;
+  padding: 0.25rem 0.5rem;
   border-left: 2px solid transparent;
   border-radius: 3px;
-  align-items: start;
+  align-items: center;
 
-  &:hover { background: var(--surface-plus-1); }
+  &:hover { background: var(--surface-plus-2); }
 
   &[data-level="log"]   { border-left-color: var(--color-neutral); }
   &[data-level="info"]  { border-left-color: var(--color-info);    }
@@ -19,25 +19,33 @@
 
 .Entry_time {
   color: var(--color-text-muted);
-  font-size: 11px;
+  font-size: 0.72rem;
   font-variant-numeric: tabular-nums;
 }
 
 .Entry_level {
-  font-size: 11px;
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.7rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--surface-minus-2);
+  background: var(--surface-plus-2);
 
-  .Entry[data-level="log"]   & { color: var(--color-neutral); }
-  .Entry[data-level="info"]  & { color: var(--color-info);    }
-  .Entry[data-level="warn"]  & { color: var(--color-warning); }
-  .Entry[data-level="error"] & { color: var(--color-alert);   }
-  .Entry[data-level="debug"] & { color: var(--color-debug);   }
+  .Entry[data-level="info"]  & { color: var(--color-info);    background: oklch(from var(--color-info)    l c h / 0.14); border-color: oklch(from var(--color-info)    l c h / 0.35); }
+  .Entry[data-level="warn"]  & { color: var(--color-warning); background: oklch(from var(--color-warning) l c h / 0.16); border-color: oklch(from var(--color-warning) l c h / 0.35); }
+  .Entry[data-level="error"] & { color: var(--color-alert);   background: oklch(from var(--color-alert)   l c h / 0.14); border-color: oklch(from var(--color-alert)   l c h / 0.40); }
+  .Entry[data-level="debug"] & { color: var(--color-debug);   background: oklch(from var(--color-debug)   l c h / 0.12); border-color: oklch(from var(--color-debug)   l c h / 0.32); }
 }
 
 .Entry_app {
-  color: var(--color-info);
-  font-size: 12px;
+  font-size: 0.78rem;
+  font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -45,17 +53,17 @@
 
 .Entry_scope {
   color: var(--color-text-muted);
-  font-size: 11px;
+  font-weight: 400;
+  font-size: 0.72rem;
 }
 
 .Entry_body {
   white-space: pre-wrap;
   word-break: break-word;
-  color: var(--color-text);
 }
 
 .Entry_count {
   color: var(--color-warning);
-  font-size: 11px;
-  margin-left: 4px;
+  font-size: 0.72rem;
+  margin-left: 0.25rem;
 }
