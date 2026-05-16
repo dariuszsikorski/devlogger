@@ -2,6 +2,14 @@
 
 Structured, scope-aware console logger built for LLM-readable terminal output. Works in Node.js, modern bundlers, and plain browsers from a single import.
 
+<p>
+  <img src="./viewer/screen-1.png" alt="devlogger viewer - live call graph in the browser" width="900" />
+</p>
+
+<p>
+  <img src="./viewer/screen-2.png" alt="devlogger - structured terminal output" width="900" />
+</p>
+
 ## At a glance - how devlogger differs from `console.log`
 
 Same call site, different output. The scope tag (and a per-call counter when bursts collapse) makes terminal output instantly traceable to its source - especially useful for AI agents reading logs to reason about what happened.
