@@ -4,8 +4,8 @@ import { Slider, SliderOutput, SliderThumb, SliderTrack } from 'react-aria-compo
 import { Moon, Sun } from 'lucide-react'
 
 const STORAGE_KEY = 'devlogger.brightness'
-const MIN     = 0.15
-const MAX     = 0.95
+const MIN     = 0.10
+const MAX     = 1.0
 const DEFAULT = 0.18
 
 function readSaved(): number {
