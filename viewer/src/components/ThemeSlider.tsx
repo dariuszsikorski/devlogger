@@ -7,6 +7,7 @@ const STORAGE_KEY = 'devlogger.brightness'
 const MIN     = 0.10
 const MAX     = 1.0
 const DEFAULT = 0.18
+const THEME_LIGHT_THRESHOLD = 0.67
 
 function readSaved(): number {
   try {
@@ -35,8 +36,10 @@ function applyBrightness(L: number) {
     `:root { --surface-base: oklch(${L.toFixed(3)} 0.005 255) !important; }`
 
   const root = document.documentElement
-  root.classList.toggle('theme-dark',  L <  0.5)
-  root.classList.toggle('theme-light', L >= 0.5)
+  root.classList.toggle('theme-dark',  L <  THEME_LIGHT_THRESHOLD)
+  root.classList.toggle('theme-light', L >= THEME_LIGHT_THRESHOLD)
+
+  document.dispatchEvent(new CustomEvent('devlogger:brightness', { detail: { L } }))
 }
 
 export function ThemeSlider() {

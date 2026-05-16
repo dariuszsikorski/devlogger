@@ -1,4 +1,4 @@
-// @purpose Header - default styles target light theme, .theme-dark & blocks override.
+// @purpose Header - semantic color tokens; minimal theme-specific overrides only for text/glow.
 .Header {
   display: flex;
   align-items: center;
@@ -19,12 +19,9 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: oklch(0.50 0.22 245);
+  background: var(--color-info);
 
-  .theme-dark & {
-    background: oklch(0.75 0.20 245);
-    box-shadow: 0 0 6px oklch(0.75 0.20 245 / 0.4);
-  }
+  .theme-dark & { box-shadow: 0 0 6px oklch(from var(--color-info) l c h / 0.4); }
 }
 
 .Header_title {
@@ -41,10 +38,8 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  color: oklch(0.50 0.005 255);
+  color: var(--color-neutral);
   font-size: 12px;
-
-  .theme-dark & { color: oklch(0.65 0.005 255); }
 }
 
 .Header_status {
@@ -53,13 +48,8 @@
   gap: 6px;
   font-variant-numeric: tabular-nums;
 
-  &.is-connected    { color: oklch(0.50 0.20 145); }
-  &.is-disconnected { color: oklch(0.50 0.25 25); }
-
-  .theme-dark & {
-    &.is-connected    { color: oklch(0.78 0.20 145); }
-    &.is-disconnected { color: oklch(0.70 0.22 25); }
-  }
+  &.is-connected    { color: var(--color-success); }
+  &.is-disconnected { color: var(--color-alert);   }
 }
 
 .Header_statusIcon { fill: currentColor; }
@@ -82,14 +72,9 @@
   cursor: pointer;
   transition: border-color 120ms, color 120ms, background 120ms;
 
-  &[data-hovered]       { border-color: oklch(0.50 0.22 245); color: oklch(0.50 0.22 245); }
+  &[data-hovered]       { border-color: var(--color-info); color: var(--color-info); }
   &[data-pressed]       { background: var(--surface-plus-2); }
-  &[data-focus-visible] { outline: 2px solid oklch(0.50 0.22 245); outline-offset: 1px; }
+  &[data-focus-visible] { outline: 2px solid var(--color-info); outline-offset: 1px; }
 
-  .theme-dark & {
-    color: oklch(0.94 0.005 255);
-
-    &[data-hovered]       { border-color: oklch(0.75 0.20 245); color: oklch(0.75 0.20 245); }
-    &[data-focus-visible] { outline-color: oklch(0.75 0.20 245); }
-  }
+  .theme-dark & { color: oklch(0.94 0.005 255); }
 }

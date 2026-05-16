@@ -1,0 +1,79 @@
+// @purpose Font size slider - paired with clickable px/percent indicator that resets to default on click.
+.FontSizeSlider {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.FontSizeSlider_slider {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: 140px;
+  user-select: none;
+}
+
+.FontSizeSlider_iconSmall,
+.FontSizeSlider_iconLarge {
+  color: var(--color-neutral);
+  flex-shrink: 0;
+}
+
+.FontSizeSlider_track {
+  position: relative;
+  flex: 1;
+  height: 4px;
+  background: var(--surface-minus-2);
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.FontSizeSlider_fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: var(--color-info);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.FontSizeSlider_thumb {
+  width: 12px;
+  height: 12px;
+  top: 50%;
+  border-radius: 50%;
+  background: var(--surface-plus-5);
+  border: 2px solid var(--color-info);
+  transition: transform 120ms;
+
+  &[data-hovered]       { transform: scale(1.15); }
+  &[data-dragging]      { transform: scale(1.3); }
+  &[data-focus-visible] { outline: 2px solid var(--color-info); outline-offset: 2px; }
+}
+
+.FontSizeSlider_reset {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 3px 8px;
+  font: inherit;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  background: var(--surface-plus-2);
+  border: 1px solid var(--surface-minus-2);
+  border-radius: 4px;
+  cursor: pointer;
+  color: oklch(0.20 0.005 255);
+
+  &:hover         { background: var(--surface-plus-3); }
+  &:focus-visible { outline: 2px solid var(--color-info); outline-offset: 1px; }
+
+  .theme-dark & { color: oklch(0.94 0.005 255); }
+}
+
+.FontSizeSlider_resetPct {
+  color: var(--color-neutral);
+  font-size: 9.5px;
+}

@@ -2,6 +2,7 @@
 import { Button } from 'react-aria-components'
 import { Circle, Trash2 } from 'lucide-react'
 import { ThemeSlider } from './ThemeSlider'
+import { FontSizeSlider } from './FontSizeSlider'
 import { ViewSwitch, type ViewKey } from './ViewSwitch'
 
 interface HeaderProps {
@@ -34,6 +35,7 @@ export function Header({
       </div>
 
       <div className="Header_meta">
+        <FontSizeSlider />
         <ThemeSlider />
 
         <span className={statusClass}>

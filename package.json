@@ -52,12 +52,12 @@
   "bugs": "https://github.com/dariuszsikorski/devlogger/issues",
   "homepage": "https://github.com/dariuszsikorski/devlogger#readme",
   "devDependencies": {
+    "@dagrejs/dagre": "^1.1.5",
     "@fastify/static": "^8.0.4",
     "@fastify/websocket": "^11.0.2",
     "@types/node": "^22.0.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@dagrejs/dagre": "^1.1.5",
     "@vitejs/plugin-react-swc": "^4.2.3",
     "@xyflow/react": "^12.4.4",
     "fastify": "^5.3.2",
@@ -74,5 +74,8 @@
   "engines": {
     "node": ">=14"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "dependencies": {
+    "culori": "^4.0.2"
+  }
 }

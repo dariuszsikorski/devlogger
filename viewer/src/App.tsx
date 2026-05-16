@@ -5,6 +5,7 @@ import { Filters } from './components/Filters'
 import { Stream } from './components/Stream'
 import { Graph } from './components/Graph'
 import { useStream } from './hooks/useStream'
+import { useSemanticColors } from './useSemanticColors'
 import { formatArgs } from './utils/format'
 import type { ViewKey } from './components/ViewSwitch'
 import type { StreamItem } from './types'
@@ -12,6 +13,8 @@ import type { StreamItem } from './types'
 const MAX_ENTRIES = 2000
 
 export function App() {
+  useSemanticColors()
+
   const [entries, setEntries] = useState<StreamItem[]>([])
   const [apps, setApps] = useState<string[]>([])
 

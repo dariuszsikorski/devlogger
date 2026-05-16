@@ -521,7 +521,7 @@ export function useCallGraph(entries: StreamItem[]): CallGraphResult {
   const edges: Edge<CallEdgeData>[] = []
   for (const e of stateRef.current.edges.values()) {
     const isHot = now - (e.data?.firedAt ?? 0) < HOT_WINDOW
-    const markerColor = isHot ? 'oklch(0.55 0.20 145)' : 'oklch(0.55 0.005 255)'
+    const markerColor = isHot ? 'var(--color-success)' : 'var(--color-neutral)'
     const rawFires = e.data?.recentFires ?? []
     const visibleFires = rawFires.filter((t) => now - t < PACKAGE_VISIBLE_MS)
     edges.push({

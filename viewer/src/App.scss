@@ -2,6 +2,7 @@
 // All chromatic/text colors are hardcoded inline in component SCSS files,
 // with `.theme-dark &` overrides for the dark variant.
 @use './components/ThemeSlider.scss';
+@use './components/FontSizeSlider.scss';
 @use './components/Header.scss';
 @use './components/Filters.scss';
 @use './components/Stream.scss';

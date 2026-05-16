@@ -1,4 +1,4 @@
-// @purpose Brightness slider - default light theme, .theme-dark & overrides.
+// @purpose Brightness slider - uses semantic --color-* tokens written by useSemanticColors; no more theme overrides per element.
 .ThemeSlider {
   display: inline-flex;
   align-items: center;
@@ -10,19 +10,15 @@
 .ThemeSlider_value {
   font-family: var(--font-mono);
   font-size: 11px;
-  color: oklch(0.55 0.005 255);
+  color: var(--color-neutral);
   font-variant-numeric: tabular-nums;
   min-width: 28px;
   text-align: right;
-
-  .theme-dark & { color: oklch(0.62 0.005 255); }
 }
 
 .ThemeSlider_icon {
-  color: oklch(0.55 0.005 255);
+  color: var(--color-neutral);
   flex-shrink: 0;
-
-  .theme-dark & { color: oklch(0.62 0.005 255); }
 }
 
 .ThemeSlider_track {
@@ -39,11 +35,9 @@
   top: 0;
   left: 0;
   height: 100%;
-  background: oklch(0.50 0.22 245);
+  background: var(--color-info);
   border-radius: 2px;
   pointer-events: none;
-
-  .theme-dark & { background: oklch(0.75 0.20 245); }
 }
 
 .ThemeSlider_thumb {
@@ -52,17 +46,14 @@
   top: 50%;
   border-radius: 50%;
   background: oklch(0.20 0.005 255);
-  border: 2px solid oklch(0.50 0.22 245);
+  border: 2px solid var(--color-info);
   transition: transform 120ms;
 
   &[data-hovered]       { transform: scale(1.15); }
   &[data-dragging]      { transform: scale(1.3); }
-  &[data-focus-visible] { outline: 2px solid oklch(0.50 0.22 245); outline-offset: 2px; }
+  &[data-focus-visible] { outline: 2px solid var(--color-info); outline-offset: 2px; }
 
   .theme-dark & {
     background: oklch(0.94 0.005 255);
-    border-color: oklch(0.75 0.20 245);
-
-    &[data-focus-visible] { outline-color: oklch(0.75 0.20 245); }
   }
 }

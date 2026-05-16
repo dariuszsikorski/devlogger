@@ -1,4 +1,4 @@
-// @purpose Filters - default light theme, .theme-dark & overrides.
+// @purpose Filters - semantic --color-* tokens; minimal theme overrides only for primary text.
 .Filters {
   display: flex;
   gap: 8px;
@@ -25,16 +25,11 @@
     border-radius: 4px;
     font: inherit;
 
-    &::placeholder { color: oklch(0.55 0.005 255); }
-    &:focus        { outline: none; border-color: oklch(0.50 0.22 245); }
+    &::placeholder { color: var(--color-neutral); }
+    &:focus        { outline: none; border-color: var(--color-info); }
   }
 
-  .theme-dark & input {
-    color: oklch(0.94 0.005 255);
-
-    &::placeholder { color: oklch(0.62 0.005 255); }
-    &:focus        { border-color: oklch(0.75 0.20 245); }
-  }
+  .theme-dark & input { color: oklch(0.94 0.005 255); }
 }
 
 .Filters_searchIcon {
@@ -42,10 +37,8 @@
   left: 8px;
   top: 50%;
   transform: translateY(-50%);
-  color: oklch(0.55 0.005 255);
+  color: var(--color-neutral);
   pointer-events: none;
-
-  .theme-dark & { color: oklch(0.62 0.005 255); }
 }
 
 .Filters_select { min-width: 140px; }
@@ -64,15 +57,10 @@
   font: inherit;
   cursor: pointer;
 
-  &[data-hovered]       { border-color: oklch(0.50 0.22 245); }
-  &[data-focus-visible] { outline: 2px solid oklch(0.50 0.22 245); outline-offset: 1px; }
+  &[data-hovered]       { border-color: var(--color-info); }
+  &[data-focus-visible] { outline: 2px solid var(--color-info); outline-offset: 1px; }
 
-  .theme-dark & {
-    color: oklch(0.94 0.005 255);
-
-    &[data-hovered]       { border-color: oklch(0.75 0.20 245); }
-    &[data-focus-visible] { outline-color: oklch(0.75 0.20 245); }
-  }
+  .theme-dark & { color: oklch(0.94 0.005 255); }
 }
 
 .Filters_popover {
@@ -98,11 +86,7 @@
   outline: none;
 
   &[data-hovered], &[data-focused] { background: var(--surface-plus-3); }
-  &[data-selected]                 { color: oklch(0.50 0.22 245); }
+  &[data-selected]                 { color: var(--color-info); }
 
-  .theme-dark & {
-    color: oklch(0.94 0.005 255);
-
-    &[data-selected] { color: oklch(0.75 0.20 245); }
-  }
+  .theme-dark & { color: oklch(0.94 0.005 255); }
 }

@@ -39,10 +39,8 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: oklch(0.50 0.22 245);
+  background: var(--color-info);
   flex-shrink: 0;
-
-  .theme-dark & { background: oklch(0.75 0.20 245); }
 }
 
 .ScopeGroup_title {
@@ -56,8 +54,6 @@
 
 .ScopeGroup_count {
   font-variant-numeric: tabular-nums;
-  color: oklch(0.50 0.005 255);
+  color: var(--color-neutral);
   font-size: 10px;
-
-  .theme-dark & { color: oklch(0.65 0.005 255); }
 }
