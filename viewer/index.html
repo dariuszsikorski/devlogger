@@ -9,20 +9,36 @@
   </head>
   <body>
     <script>
-      // Restore --surface-base + theme class before first paint to avoid flash.
+      // Restore --surface-base + --root-font-size przed pierwszym paintem (FOUC).
+      // OBIE zmienne ladowane sa do <style id="theme-vars">, nie inline na <html>.
+      // Inline na <html> ma wyzsza specyficznosc niz :root w stylesheet i blokowal
+      // pozniejsze nadpisanie przez themeStyle store (slider nie ruszal sie).
+      // Zakres i prog MUSZA byc identyczne z ThemeSlider/useSemanticColors (0.10..1.0, 0.67).
       (function () {
+        var b = 0.18;
+        var f = 13;
         try {
-          var raw = localStorage.getItem('devlogger.brightness');
-          var n = raw === null ? 0.18 : parseFloat(raw);
-          if (!(n >= 0.15 && n <= 0.95)) n = 0.18;
-
-          var style = document.createElement('style');
-          style.id = 'theme-vars';
-          style.textContent = ':root { --surface-base: oklch(' + n + ' 0.005 255) !important; }';
-          document.head.appendChild(style);
-
-          document.documentElement.classList.add(n < 0.5 ? 'theme-dark' : 'theme-light');
+          var rawB = localStorage.getItem('devlogger.brightness');
+          var parsedB = rawB === null ? b : parseFloat(rawB);
+          if (parsedB >= 0.10 && parsedB <= 1.0) b = parsedB;
         } catch (e) { /* ignore */ }
+        try {
+          var rawF = localStorage.getItem('devlogger.fontsize');
+          var parsedF = rawF === null ? f : parseFloat(rawF);
+          if (parsedF >= 9 && parsedF <= 28) f = parsedF;
+        } catch (e) { /* ignore */ }
+
+        // !important jest tu tylko FOUC guardem (dla 2 zmiennych do pierwszego renderu themeStyle,
+        // ktory przesuwa tag na koniec <head> i wygrywa potem po source-order BEZ !important).
+        var style = document.createElement('style');
+        style.id = 'theme-vars';
+        style.textContent =
+          ':root {\n' +
+          '  --surface-base: oklch(' + b + ' 0.005 255) !important;\n' +
+          '  --root-font-size: ' + f.toFixed(1) + 'px !important;\n' +
+          '}';
+        document.head.appendChild(style);
+        document.documentElement.classList.add(b < 0.67 ? 'theme-dark' : 'theme-light');
       })();
     </script>
     <div id="root"></div>

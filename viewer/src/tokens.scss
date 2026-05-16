@@ -1,0 +1,116 @@
+// @purpose Root design tokens - surface system (slider-controlled) + fallback semantic colors. Chromatyczne --color-* sa nadpisywane runtime'owo przez themeStyle store (useSemanticColors zapisuje z !important). Tu siedza tylko fallbacki + zakres surface-plus/minus.
+//
+// REFERENCE - measured rgb + relative luminance (WCAG Yrel) for --surface-base
+// at oklch(L 0.005 255) across the slider range. L is the slider value, NOT a
+// percentage of perceived brightness. Measured 2026-05-16 on chromium via
+// canvas 2d fill of `oklch(L 0.005 255)` then getImageData on a 1x1 pixel.
+//
+//   L      rgb               Yrel
+//   0.10   (  2,  2,  4)      0.1%   <- floor of the slider; near-black
+//   0.15   ( 10, 10, 12)      0.3%
+//   0.20   ( 20, 22, 25)      0.8%
+//   0.25   ( 33, 35, 36)      1.7%
+//   0.30   ( 44, 46, 48)      2.7%
+//   0.35   ( 57, 59, 61)      4.3%
+//   0.40   ( 70, 73, 75)      6.6%
+//   0.45   ( 82, 84, 88)      8.8%
+//   0.50   ( 96, 99,103)     12.4%   <- nominal midpoint, perceptually still dark
+//   0.55   (112,114,116)     16.7%
+//   0.60   (127,129,131)     21.9%
+//   0.65   (141,142,147)     27.1%
+//   0.70   (156,158,160)     34.1%
+//   0.75   (173,175,177)     42.7%
+//   0.80   (186,190,192)     51.1%   <- ACTUAL perceptual midpoint (Yrel~=50%)
+//   0.85   (203,206,209)     61.4%
+//   0.90   (221,223,225)     73.6%
+//   0.95   (236,238,243)     85.5%
+//   1.00   (253,255,255)     99.6%   <- ceiling; near-white
+//
+// Implications when picking semantic colors:
+//
+// - OKLCH L is roughly perceptually uniform along its own axis BUT the
+//   sRGB output is non-linear (gamma), so equal L deltas do not give equal
+//   rgb deltas. Use the Yrel column to pick contrast.
+// - The theme-dark / theme-light switch fires at L=0.67. Surfaces between
+//   L=0.50..0.67 read as "dark gray" - light-theme tokens look washed there.
+// - When designing a new semantic accent, target Yrel by inverse lookup
+//   from this table rather than picking L by intuition.
+//
+// WCAG 2.x CONTRAST RULES
+//
+// Contrast ratio = (Y_lighter + 0.05) / (Y_darker + 0.05). Result 1.0..21.0.
+//
+//   AA  normal text   >= 4.5 : 1     (default target here)
+//   AA  large text    >= 3   : 1     (>= 18pt or >= 14pt bold)
+//   AAA normal text   >= 7   : 1
+//   AAA large text    >= 4.5 : 1
+//
+// Given a surface luminance Y_bg, the valid TEXT luminance bounds are:
+//
+//   - lighter text needs:  Y_text >= ratio * (Y_bg + 0.05) - 0.05
+//   - darker  text needs:  Y_text <= (Y_bg + 0.05) / ratio - 0.05
+//
+// AA 4.5:1 applied to the measured curve (interpolated L bounds; "-" =
+// impossible at this surface):
+//
+//   surface L  Y_bg     light text         dark text
+//   0.10        0.1%    L >= 0.56          -
+//   0.20        0.8%    L >= 0.59          -
+//   0.30        2.7%    L >= 0.65          -
+//   0.40        6.6%    L >= 0.78          -
+//   0.50       12.4%    L >= 0.89          -
+//   0.60       21.9%    -                  -        <- DEAD ZONE
+//   0.70       34.1%    -                  L <= 0.34
+//   0.80       51.1%    -                  L <= 0.41
+//   0.90       73.6%    -                  L <= 0.51
+//   1.00       99.6%    -                  L <= 0.55
+//
+// DEAD ZONE: surface L ~= 0.56..0.62 (Y_bg ~= 17..23%) nie utrzyma zadnego
+// AA tekstu. Albo trzymaj tam wylacznie large text (3:1) albo traktuj jako
+// dekoracyjne tlo bez body text.
+
+:root {
+  color-scheme: light dark;
+
+  // Fallback. Boot script (index.html) i themeStyle store nadpisuja !important.
+  --surface-base: oklch(0.18 0.005 255);
+
+  --surface-minus-1: oklch(from var(--surface-base) clamp(0, calc(l - 0.02), 1) c h);
+  --surface-minus-2: oklch(from var(--surface-base) clamp(0, calc(l - 0.05), 1) c h);
+  --surface-minus-3: oklch(from var(--surface-base) clamp(0, calc(l - 0.09), 1) c h);
+  --surface-minus-4: oklch(from var(--surface-base) clamp(0, calc(l - 0.14), 1) c h);
+  --surface-minus-5: oklch(from var(--surface-base) clamp(0, calc(l - 0.21), 1) c h);
+  --surface-minus-6: oklch(from var(--surface-base) clamp(0, calc(l - 0.29), 1) c h);
+  --surface-minus-7: oklch(from var(--surface-base) clamp(0, calc(l - 0.40), 1) c h);
+  --surface-minus-8: oklch(from var(--surface-base) clamp(0, calc(l - 0.54), 1) c h);
+  --surface-minus-9: oklch(from var(--surface-base) clamp(0, calc(l - 0.75), 1) c h);
+
+  --surface-plus-1:  oklch(from var(--surface-base) clamp(0, calc(l + 0.02), 1) c h);
+  --surface-plus-2:  oklch(from var(--surface-base) clamp(0, calc(l + 0.05), 1) c h);
+  --surface-plus-3:  oklch(from var(--surface-base) clamp(0, calc(l + 0.09), 1) c h);
+  --surface-plus-4:  oklch(from var(--surface-base) clamp(0, calc(l + 0.14), 1) c h);
+  --surface-plus-5:  oklch(from var(--surface-base) clamp(0, calc(l + 0.21), 1) c h);
+  --surface-plus-6:  oklch(from var(--surface-base) clamp(0, calc(l + 0.29), 1) c h);
+  --surface-plus-7:  oklch(from var(--surface-base) clamp(0, calc(l + 0.40), 1) c h);
+  --surface-plus-8:  oklch(from var(--surface-base) clamp(0, calc(l + 0.54), 1) c h);
+  --surface-plus-9:  oklch(from var(--surface-base) clamp(0, calc(l + 0.75), 1) c h);
+
+  // Statyczne fallbacki - useSemanticColors nadpisuje !important.
+  --color-text:        oklch(0.94 0.005 255);
+  --color-text-muted:  oklch(0.85 0.005 255);
+
+  --color-success: oklch(0.75 0.16 145);
+  --color-warning: oklch(0.80 0.16  75);
+  --color-alert:   oklch(0.72 0.18  25);
+  --color-info:    oklch(0.75 0.18 245);
+  --color-debug:   oklch(0.70 0.18 295);
+  --color-neutral: oklch(0.70 0.01 255);
+  --color-accent:  oklch(0.75 0.20 245);
+
+  // Aliasy semantyczne.
+  --color-primary: var(--color-accent);
+  --color-error:   var(--color-alert);
+
+  --font-ui:   ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "Cascadia Mono", Menlo, Consolas, monospace;
+}

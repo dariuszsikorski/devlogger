@@ -1,4 +1,4 @@
-// @purpose Color palette - single registry of semantic colors with hue + tuned L delta curves; consumed by useSemanticColors. Adding a new color is one PALETTE entry.
+// @purpose Color palette - single registry of semantic colors with hue/saturation overrides and hand-tuned L delta curves; consumed by useSemanticColors and ColorRamps.
 
 interface OffsetPoint { surfaceL: number; delta: number }
 
@@ -12,6 +12,7 @@ function curve(...points: Array<[number, number]>): ReadonlyArray<OffsetPoint> {
   return points.map(([surfaceL, level]) => ({ surfaceL, delta: OFFSET_LEVEL_TO_DELTA[level] ?? 0 }))
 }
 
+// Tuned visually 2026-05-16. Each pair = [surfaceL, offset_level_-3..+3].
 const SUCCESS_CURVE = curve(
   [0.10, +1], [0.30, +3], [0.45, +2], [0.61, +1], [0.67, -1],
   [0.75,  0], [0.90, +1], [0.95,  0], [1.00, +1],
@@ -41,11 +42,12 @@ export const PALETTE: ReadonlyArray<SemanticColor> = [
   { name: 'warning', H:  75,             deltas: WARNING_CURVE },
   { name: 'alert',   H:  25,             deltas: ALERT_CURVE   },
   { name: 'info',    H: 245,             deltas: INFO_CURVE    },
-  { name: 'debug',   H: 295,                                   },
+  { name: 'debug',   H: 295,             deltas: INFO_CURVE    },
   { name: 'neutral', H: 255, forceS: 0,                        },
   { name: 'accent',  H: 245,             deltas: INFO_CURVE    },
 ]
 
+// Step deltas used for L+/-N offset variants exposed on every color as CSS vars.
 export const OFFSET_LEVELS: ReadonlyArray<{ level: number; key: string; delta: number }> = [
   { level: -3, key: 'minus-3', delta: -0.18 },
   { level: -2, key: 'minus-2', delta: -0.10 },

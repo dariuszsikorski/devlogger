@@ -26,7 +26,7 @@ function applyForSurface(surfaceL: number) {
 
   const isLightSurface = surfaceL >= THEME_LIGHT_THRESHOLD
   partial['--color-text']       = isLightSurface ? 'oklch(0.20 0.005 255)' : 'oklch(0.94 0.005 255)'
-  partial['--color-text-muted'] = isLightSurface ? 'oklch(0.32 0.005 255)' : 'oklch(0.65 0.005 255)'
+  partial['--color-text-muted'] = isLightSurface ? 'oklch(0.32 0.005 255)' : 'oklch(0.85 0.005 255)'
 
   for (const color of PALETTE) {
     const sat     = color.forceS ?? S

@@ -1,4 +1,4 @@
-// @purpose Hand-tuned base L curve for semantic text against surface L. Two segments separated by a deliberate light-text/dark-text discontinuity around surface L 0.67.
+// @purpose Hand-tuned color graph - okhsl (L, S) for semantic text against surface L. Piecewise linear interpolation over two segments separated by a deliberate light-text/dark-text discontinuity around surface L 0.725.
 
 interface ColorPoint {
   surfaceL: number
