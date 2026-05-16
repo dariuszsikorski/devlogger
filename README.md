@@ -377,11 +377,52 @@ The root `package.json` is the published library; `viewer/` and `simulation/` ar
 Common scripts from the repository root:
 
 ```bash
-pnpm build       # builds logger/dist
-pnpm viewer      # starts broker + auto-opens the web viewer
-pnpm sim         # runs the simulation suite
-pnpm selftest    # quick library self-test
+pnpm build          # builds logger/dist
+pnpm viewer         # starts broker + auto-opens the web viewer
+pnpm viewer:tunnel  # starts broker + Cloudflare quick tunnel (public URL)
+pnpm sim            # runs the simulation suite
+pnpm selftest       # quick library self-test
 ```
+
+## Remote viewing - debug from a phone or any external device
+
+Sometimes you want to watch the log stream from outside your machine - on a phone during a walk, on a tablet on the other side of the room, on a colleague's laptop. The broker only binds to `127.0.0.1`, so it is not directly reachable. `pnpm viewer:tunnel` solves this by starting the broker and a [Cloudflare quick tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/trycloudflare/) side by side. The tunnel makes an outbound connection to Cloudflare and assigns a public HTTPS URL - no port forwarding, no public IP, no account required.
+
+```sh
+pnpm viewer:build      # one-time (or after viewer source changes)
+pnpm viewer:tunnel
+```
+
+Output looks like:
+
+```text
+[devlogger-tunnel] starting broker on http://127.0.0.1:9777 ...
+[devlogger-tunnel] starting Cloudflare quick tunnel ...
++--------------------------------------------------------------------------------------------+
+|  Your quick Tunnel has been created! Visit it at (it may take some time to be reachable):  |
+|  https://<random-words>.trycloudflare.com                                                  |
++--------------------------------------------------------------------------------------------+
+```
+
+Open that URL on any device. The viewer's WebSocket upgrades automatically to `wss://` so it works over HTTPS.
+
+Prerequisites:
+
+```sh
+# Windows
+winget install Cloudflare.cloudflared
+# macOS
+brew install cloudflared
+# Linux: see https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/
+```
+
+If `cloudflared` lives somewhere unusual, point at it with the `CLOUDFLARED` env var.
+
+Notes:
+
+- Quick tunnel URLs are ephemeral - each restart gives a new one. For a stable address use a [named tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) tied to a Cloudflare account.
+- The tunnel is public for anyone who guesses the URL. Treat the viewer as anonymous read-only - no secrets in your log payloads while a tunnel is open.
+- Override the local port with `DEVLOGGER_PORT` (default `9777`).
 
 Files are kept small and single-purpose to make future tests and contributions straightforward.
 

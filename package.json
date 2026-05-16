@@ -29,6 +29,7 @@
     "viewer": "tsx viewer/server.ts",
     "viewer:build": "vite build --config viewer/vite.config.ts",
     "viewer:dev": "node viewer/dev.mjs",
+    "viewer:tunnel": "node viewer/tunnel.mjs",
     "sim": "node simulation/run.mjs",
     "prepublishOnly": "pnpm build"
   },

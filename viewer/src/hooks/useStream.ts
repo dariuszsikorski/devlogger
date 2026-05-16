@@ -13,7 +13,8 @@ export function useStream(onBatch: (items: StreamItem[]) => void) {
     let reconnectTimer: number | null = null
     let disposed = false
 
-    const wsUrl = `ws://${location.host}/stream`
+    const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:'
+    const wsUrl = `${wsProtocol}//${location.host}/stream`
 
     function connect() {
       if (disposed) return
