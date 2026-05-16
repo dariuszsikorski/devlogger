@@ -1,7 +1,14 @@
 // @purpose Edge payload glyph - parcel-look box, warning-hue offsets. Cien wyliczany z surface-base zeby skalowal sie z motywem.
 .CallEdge_payload {
   pointer-events: none;
-  animation: callEdgePayloadFade 3500ms ease-out forwards;
+  // In-flight packages just fade in briefly then stay fully opaque until they
+  // arrive. On arrival they unmount and the static <ArrivedPile> takes over,
+  // so there is no fade-out here.
+  animation: callEdgePayloadFadeIn 220ms ease-out;
+}
+
+.CallEdge_pile {
+  pointer-events: none;
 }
 
 .CallEdge_payloadBox {
@@ -21,9 +28,7 @@
   stroke-linecap: butt;
 }
 
-@keyframes callEdgePayloadFade {
+@keyframes callEdgePayloadFadeIn {
   0%   { opacity: 0; }
-  5%   { opacity: 1; }
-  82%  { opacity: 1; }
-  100% { opacity: 0; }
+  100% { opacity: 1; }
 }
