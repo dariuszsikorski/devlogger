@@ -54,7 +54,9 @@ interface ParsedExec {
 }
 
 // Group container geometry. Function nodes use positions RELATIVE to their parent group.
-const GROUP_W       = 264
+// GROUP_W = NODE_W (220 from CallNode.scss) + 2*NODE_X_INSIDE so child nodes
+// sit with symmetric horizontal padding inside the frame.
+const GROUP_W       = 244
 const GROUP_GAP_X   = 36
 const GROUP_GAP_Y   = 40
 const COL_STRIDE    = GROUP_W + GROUP_GAP_X
@@ -329,8 +331,12 @@ function bumpNode(
   })
 }
 
-const MAX_PACKAGES_PER_EDGE = 6
-const PACKAGE_VISIBLE_MS    = 3500
+// recentFires only feeds in-flight rendering now - arrived packages are
+// drawn separately as a static pile from the persistent edge `count`. Window
+// is just past the longest possible flight (MAX_FLIGHT_MS=8000 in CallEdge)
+// so in-flight items survive their full animation before eviction.
+const MAX_PACKAGES_PER_EDGE = 24
+const PACKAGE_VISIBLE_MS    = 9000
 
 function bumpEdge(
   state: GraphState,
@@ -343,16 +349,21 @@ function bumpEdge(
   const existing = state.edges.get(id)
 
   let recentFires: number[]
+  // Bursty exec streams can produce many fires within the same millisecond
+  // so timestamps collide. Nudge by 1ms until unique within the window so
+  // downstream React keys (firedAt) stay unique.
+  let uniqueFiredAt = firedAt
   if (existing?.data) {
     recentFires = (existing.data.recentFires ?? []).filter(
       (t) => firedAt - t < PACKAGE_VISIBLE_MS,
     )
-    recentFires.push(firedAt)
+    while (recentFires.includes(uniqueFiredAt)) uniqueFiredAt++
+    recentFires.push(uniqueFiredAt)
     if (recentFires.length > MAX_PACKAGES_PER_EDGE) {
       recentFires = recentFires.slice(-MAX_PACKAGES_PER_EDGE)
     }
   } else {
-    recentFires = [firedAt]
+    recentFires = [uniqueFiredAt]
   }
 
   if (existing) {
@@ -515,8 +526,18 @@ export function useCallGraph(entries: StreamItem[]): CallGraphResult {
   const now = Date.now()
   const HOT_WINDOW = 3000
 
+  // React Flow v12 requires parent nodes (groups) to appear BEFORE their
+  // children in the array - otherwise "Parent node X not found" warnings
+  // spam the console every commit. Map insertion order doesn't guarantee
+  // this after reassignFnNode() inserts a new group whose child was already
+  // in the map. Emit all groups first, then children, regardless of order.
   const nodes: AnyGraphNode[] = []
-  for (const n of stateRef.current.nodes.values()) nodes.push(n)
+  const childNodes: AnyGraphNode[] = []
+  for (const n of stateRef.current.nodes.values()) {
+    if (n.type === 'scope-group') nodes.push(n)
+    else childNodes.push(n)
+  }
+  for (const n of childNodes) nodes.push(n)
 
   const edges: Edge<CallEdgeData>[] = []
   for (const e of stateRef.current.edges.values()) {

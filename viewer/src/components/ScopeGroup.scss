@@ -2,8 +2,13 @@
 .ScopeGroup {
   width: 100%;
   height: 100%;
+  // border-box so the 2px border counts inside the React Flow node bounds
+  // (otherwise the frame visually extends past the measured group width).
+  box-sizing: border-box;
   background: var(--surface-minus-1);
-  border: 1px dashed var(--surface-minus-3);
+  // Border = 3 levels darker than bg (minus-1 -> minus-4) for a clear,
+  // theme-aware frame on both light and dark surfaces.
+  border: 2px solid var(--surface-minus-4);
   border-radius: 10px;
   padding-top: 0;
   position: relative;
