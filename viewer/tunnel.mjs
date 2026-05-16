@@ -1,6 +1,6 @@
 // @purpose Tunnel orchestrator - spawns broker (built viewer) + Cloudflare quick tunnel, prints public URL.
 import { spawn, spawnSync } from 'node:child_process'
-import { existsSync } from 'node:fs'
+import { existsSync, readdirSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 
@@ -21,8 +21,7 @@ function resolveCloudflared() {
     const home = process.env.LOCALAPPDATA ?? ''
     const pkgRoot = join(home, 'Microsoft', 'WinGet', 'Packages')
     if (existsSync(pkgRoot)) {
-      const probe = spawnSync('cmd', ['/c', `dir /b "${pkgRoot}\\Cloudflare.cloudflared*"`], { encoding: 'utf8' })
-      const folder = probe.stdout.split(/\r?\n/).find(Boolean)
+      const folder = readdirSync(pkgRoot).find((name) => name.startsWith('Cloudflare.cloudflared'))
       if (folder) {
         const candidate = join(pkgRoot, folder, 'cloudflared.exe')
         if (existsSync(candidate)) return candidate
