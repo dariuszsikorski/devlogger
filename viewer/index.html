@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0d1117" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='13' font-size='13'%3E%E2%97%89%3C/text%3E%3C/svg%3E" />
+    <title>devlogger-viewer</title>
+  </head>
+  <body>
+    <script>
+      // Restore --surface-base + theme class before first paint to avoid flash.
+      (function () {
+        try {
+          var raw = localStorage.getItem('devlogger.brightness');
+          var n = raw === null ? 0.18 : parseFloat(raw);
+          if (!(n >= 0.15 && n <= 0.95)) n = 0.18;
+
+          var style = document.createElement('style');
+          style.id = 'theme-vars';
+          style.textContent = ':root { --surface-base: oklch(' + n + ' 0.005 255) !important; }';
+          document.head.appendChild(style);
+
+          document.documentElement.classList.add(n < 0.5 ? 'theme-dark' : 'theme-light');
+        } catch (e) { /* ignore */ }
+      })();
+    </script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

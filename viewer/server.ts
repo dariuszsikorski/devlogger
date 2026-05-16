@@ -4,6 +4,7 @@ import websocket from '@fastify/websocket'
 import staticPlugin from '@fastify/static'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
+import { existsSync } from 'node:fs'
 import { spawn } from 'node:child_process'
 
 const HOST = process.env.DEVLOGGER_HOST ?? '127.0.0.1'
@@ -43,8 +44,15 @@ await app.register(websocket, {
   options: { maxPayload: 1 * 1024 * 1024 },
 })
 
+const distDir = join(__dirname, 'dist')
+if (!existsSync(distDir)) {
+  // eslint-disable-next-line no-console
+  console.error('[devlogger-viewer] viewer/dist missing. Run: pnpm viewer:build')
+  process.exit(1)
+}
+
 await app.register(staticPlugin, {
-  root: join(__dirname, 'public'),
+  root: distDir,
   prefix: '/',
   index: ['index.html'],
 })
