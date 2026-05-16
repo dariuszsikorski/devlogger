@@ -2,7 +2,7 @@
 import { createDevLog } from '../../logger/dist/index.mjs'
 import { randDelay } from './util.mjs'
 
-const log = createDevLog('auth')
+const log = createDevLog('auth.mjs')
 
 export async function verifyToken(token) {
   return log.exec({

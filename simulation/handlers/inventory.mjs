@@ -2,7 +2,7 @@
 import { createDevLog } from '../../logger/dist/index.mjs'
 import { randDelay } from './util.mjs'
 
-const log = createDevLog('inventory')
+const log = createDevLog('inventory.mjs')
 
 export async function checkStock(productId) {
   return log.exec({

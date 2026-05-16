@@ -2,7 +2,7 @@
 import { createDevLog } from '../../logger/dist/index.mjs'
 import { randDelay, maybeFail } from './util.mjs'
 
-const log = createDevLog('validator')
+const log = createDevLog('validator.mjs')
 
 export async function validatePayload(payload) {
   return log.exec({

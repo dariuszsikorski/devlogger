@@ -2,7 +2,7 @@
 import { createDevLog } from '../../logger/dist/index.mjs'
 import { randDelay } from './util.mjs'
 
-const log = createDevLog('cache')
+const log = createDevLog('cache.mjs')
 
 export async function get(key) {
   return log.exec({

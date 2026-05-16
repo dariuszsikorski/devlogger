@@ -2,7 +2,7 @@
 import { createDevLog } from '../../logger/dist/index.mjs'
 import { randDelay } from './util.mjs'
 
-const log = createDevLog('notifier')
+const log = createDevLog('notifier.mjs')
 
 async function sendPush(uid) {
   return log.exec({

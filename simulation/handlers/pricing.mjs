@@ -2,7 +2,7 @@
 import { createDevLog } from '../../logger/dist/index.mjs'
 import { randDelay } from './util.mjs'
 
-const log = createDevLog('pricing')
+const log = createDevLog('pricing.mjs')
 
 export async function applyDiscount(product, userRole) {
   return log.exec({
