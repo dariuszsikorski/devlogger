@@ -28,6 +28,6 @@
   &[data-focus-visible] { outline: 2px solid var(--color-accent); outline-offset: 1px; }
   &[data-selected]      {
     background: var(--surface-plus-2);
-    color: var(--color-accent);
+    color: var(--color-text);
   }
 }

@@ -22,12 +22,15 @@ function CallNodeImpl({ data }: NodeProps<CallNodeType>) {
       /* ignore */
     }
     try {
+      // Subtle border-only pulse. The old version added a 16px outer glow on
+      // the box that "flashed the whole node" - dropped to keep the body
+      // surface calm and let only the border carry the activation cue.
       el.animate(
         [
-          { boxShadow: '0 0 0 0 var(--pulse-color), 0 0 16px 4px var(--pulse-color)', borderColor: 'var(--pulse-color)' },
-          { boxShadow: '0 0 0 8px transparent, 0 0 0 0 transparent', borderColor: 'var(--node-border)' },
+          { borderColor: 'var(--pulse-color)' },
+          { borderColor: 'var(--node-border)' },
         ],
-        { duration: 3000, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' },
+        { duration: 3500, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' },
       )
     } catch {
       /* WAAPI may be unsupported in tests */

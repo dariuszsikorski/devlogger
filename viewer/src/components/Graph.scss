@@ -11,7 +11,11 @@
   background: var(--surface-base);
 
   .react-flow {
-    --xy-background-pattern-dots-color-default: var(--surface-plus-2);
+    // Dot pattern derives its color from text color with low alpha, so it
+    // stays subtly visible across the full bg range (white -> black). Text
+    // color always contrasts with the surface, so reusing it with ~20%
+    // alpha gives an n8n-like dotted backdrop on any theme.
+    --xy-background-pattern-dots-color-default: oklch(from var(--color-text) l c h / 0.22);
     --xy-edge-stroke-default:          var(--color-text-muted);
     --xy-edge-stroke-selected-default: var(--color-accent);
     --xy-edge-stroke-width-default:    1.4;
@@ -70,7 +74,9 @@
   z-index: 5;
   text-align: center;
   background: var(--surface-plus-1);
-  border: 1px solid var(--surface-minus-2);
+  // 2px frame, several levels darker than the panel bg so it reads clearly
+  // on both light and dark canvases.
+  border: 2px solid var(--surface-minus-3);
   border-radius: 8px;
   padding: 16px 24px;
   max-width: 360px;

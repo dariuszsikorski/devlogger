@@ -65,7 +65,7 @@ export function Graph({ entries }: GraphProps) {
         nodesConnectable={false}
         elementsSelectable
       >
-        <Background variant={BackgroundVariant.Dots} gap={16} size={1} />
+        <Background variant={BackgroundVariant.Dots} gap={18} size={1.4} />
         <MiniMap pannable zoomable nodeStrokeWidth={3} />
         <Controls showInteractive={false} />
 

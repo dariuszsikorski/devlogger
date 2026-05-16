@@ -1,10 +1,10 @@
 // @purpose Graph node card - WSZYSTKIE wymiary w PX (React Flow v12: nodes maja fixed pixel dims; layouts w useCallGraph + layouts/* operuja na NODE_W=220/HEADER_H=28/ROW_H=104). Tekst i padding RF-node'ow NIE skaluja sie z font-sliderem - graph zawsze pikselowo stabilny, niezaleznie od root-font-size.
 .CallNode {
-  --pulse-color: var(--color-info);
+  --pulse-color: var(--color-success);
   --node-border: var(--surface-minus-2);
 
   background: var(--surface-plus-1);
-  border: 1px solid var(--node-border);
+  border: 2px solid var(--node-border);
   border-radius: 6px;
   padding: 8px 10px;
   width: 220px;
@@ -14,8 +14,11 @@
   box-shadow: inset 0 1px var(--surface-plus-2);
   overflow: hidden;
 
-  &[data-kind="fn"]    { --pulse-color: var(--color-info);    }
-  &[data-kind="scope"] { --pulse-color: var(--color-warning); }
+  // fn = exec call (successful invocation) -> green.
+  // scope = log aggregate node -> info blue by default, overridden by
+  // data-last below to reflect the level of the most recent log entry.
+  &[data-kind="fn"]    { --pulse-color: var(--color-success); }
+  &[data-kind="scope"] { --pulse-color: var(--color-info);    }
 
   &[data-last="warn"]  { --pulse-color: var(--color-warning); }
   &[data-last="error"] { --pulse-color: var(--color-alert);   }
