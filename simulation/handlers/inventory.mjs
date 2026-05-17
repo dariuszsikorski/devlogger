@@ -4,17 +4,19 @@ import { randDelay } from './util.mjs'
 
 const log = createDevLog('inventory.mjs')
 
+async function fetchWarehouseStock(productId) {
+  await randDelay(300, 1000)
+  const available = Math.floor(Math.random() * 100)
+  log.info('stock fetched', { available })
+  if (available < 5) log.warn('low stock', { available })
+  return { productId, available }
+}
+
 export async function checkStock(productId) {
   return log.exec({
     by: 'inventory.checkStock',
     target: 'GET warehouse-api/stock',
     args: { productId },
-    fn: async () => {
-      await randDelay(300, 1000)
-      const available = Math.floor(Math.random() * 100)
-      log.info('stock fetched', { available })
-      if (available < 5) log.warn('low stock', { available })
-      return { productId, available }
-    },
+    fn: () => fetchWarehouseStock(productId),
   })
 }

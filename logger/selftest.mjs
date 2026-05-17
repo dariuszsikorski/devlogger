@@ -122,23 +122,29 @@ configure({ exec: { required: [] } })
 
 // ---------------------------------------------------------------------------
 H('8. exec() - executes wrapped fn and returns value')
+function sum(a, b) {
+  return a + b
+}
 const result = auth.exec({
   by: 'ada',
   target: 'sum',
   args: [2, 3],
-  fn: (a, b) => a + b,
+  fn: sum,
 })
 E('"sum" log line above this, then "fn returned: 5"')
 console.log('fn returned:', result)
 
 // ---------------------------------------------------------------------------
 H('9. exec() - wrapped fn that throws is logged and rethrown')
+function boom() {
+  throw new Error('explode')
+}
 let caught = null
 try {
   auth.exec({
     by: 'ada',
     target: 'boom',
-    fn: () => { throw new Error('explode') },
+    fn: boom,
   })
 } catch (e) {
   caught = e
