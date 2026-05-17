@@ -21,6 +21,22 @@ export interface CallNodeData {
   [key: string]: unknown
 }
 
+/** One captured call across this edge - feeds the sidebar payload list. */
+export interface EdgePayload {
+  /** Unique per-edge id (firedAt nudged into uniqueness, matches recentFires entry). */
+  firedAt: number
+  /** Wall-clock timestamp of the underlying log entry. */
+  timestamp: number
+  /** Scope the entry was emitted in. */
+  scope: string
+  /** Head string from entry.args[0] - e.g. "X called Y with args:". */
+  head: string
+  /** Raw args[1] payload (may be undefined when the call carried no args). */
+  args: unknown
+  /** True when args were actually attached. */
+  hasArgs: boolean
+}
+
 export interface CallEdgeData {
   firedAt: number
   count: number
@@ -28,6 +44,8 @@ export interface CallEdgeData {
   hasArgs: boolean
   /** Timestamps of the most recent fires - one rendered package per entry. */
   recentFires: number[]
+  /** Captured payloads for THIS edge - newest last. Capped to MAX_PAYLOADS_PER_EDGE. */
+  payloads: EdgePayload[]
   [key: string]: unknown
 }
 
@@ -337,6 +355,9 @@ function bumpNode(
 // so in-flight items survive their full animation before eviction.
 const MAX_PACKAGES_PER_EDGE = 24
 const PACKAGE_VISIBLE_MS    = 9000
+// Stored payload buffer for the sidebar - kept generous so users can scroll
+// back through recent traffic without losing history on every fire.
+const MAX_PAYLOADS_PER_EDGE = 100
 
 function bumpEdge(
   state: GraphState,
@@ -344,6 +365,7 @@ function bumpEdge(
   targetId: string,
   firedAt: number,
   hasArgs: boolean,
+  payload: { timestamp: number; scope: string; head: string; args: unknown },
 ): void {
   const id = `${byId}=>${targetId}`
   const existing = state.edges.get(id)
@@ -366,7 +388,20 @@ function bumpEdge(
     recentFires = [uniqueFiredAt]
   }
 
+  const newPayload: EdgePayload = {
+    firedAt: uniqueFiredAt,
+    timestamp: payload.timestamp,
+    scope: payload.scope,
+    head: payload.head,
+    args: payload.args,
+    hasArgs,
+  }
+
   if (existing) {
+    const prevPayloads = existing.data?.payloads ?? []
+    const nextPayloads = prevPayloads.length >= MAX_PAYLOADS_PER_EDGE
+      ? prevPayloads.slice(prevPayloads.length - MAX_PAYLOADS_PER_EDGE + 1).concat(newPayload)
+      : prevPayloads.concat(newPayload)
     state.edges.set(id, {
       ...existing,
       data: {
@@ -377,6 +412,7 @@ function bumpEdge(
         // arg-less, which is the meaningful distinction.
         hasArgs: (existing.data?.hasArgs ?? false) || hasArgs,
         recentFires,
+        payloads: nextPayloads,
       },
     })
     return
@@ -386,7 +422,7 @@ function bumpEdge(
     source: byId,
     target: targetId,
     type: 'call',
-    data: { firedAt, count: 1, hasArgs, recentFires },
+    data: { firedAt, count: 1, hasArgs, recentFires, payloads: [newPayload] },
   })
 }
 
@@ -472,7 +508,14 @@ function processItem(item: StreamItem, state: GraphState): void {
     bumpNode(state, targetId, firedAt, { incCall: true })
 
     if (parsed.by) {
-      bumpEdge(state, parsed.by, targetId, firedAt, parsed.hasArgs)
+      const head = typeof entry.args[0] === 'string' ? entry.args[0] : ''
+      const rawArgs = parsed.hasArgs ? entry.args[1] : undefined
+      bumpEdge(state, parsed.by, targetId, firedAt, parsed.hasArgs, {
+        timestamp: entry.timestamp || firedAt,
+        scope,
+        head,
+        args: rawArgs,
+      })
     }
     return
   }
@@ -560,6 +603,7 @@ export function useCallGraph(entries: StreamItem[]): CallGraphResult {
         count: e.data?.count ?? 0,
         hasArgs: e.data?.hasArgs ?? false,
         recentFires: visibleFires,
+        payloads: e.data?.payloads ?? [],
       },
     })
   }

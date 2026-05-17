@@ -1,4 +1,6 @@
-// @purpose Edge payload glyph - parcel-look box, warning-hue offsets. Cien wyliczany z surface-base zeby skalowal sie z motywem.
+// @purpose Edge payload glyph - parcel-look box. Kolor STALY niezaleznie od motywu
+// (kartonowy odcien), zeby paczki czytaly sie zawsze tak samo. Cien dalej liczony
+// z surface-base bo to efekt swiatla, nie tozsamosc paczki.
 .CallEdge_payload {
   pointer-events: none;
   // In-flight packages just fade in briefly then stay fully opaque until they
@@ -7,13 +9,34 @@
   animation: callEdgePayloadFadeIn 220ms ease-out;
 }
 
+// Pile is the interactive payload-list trigger. Hover lifts the boxes slightly
+// and a focus/selected ring marks the active edge so the sidebar's source is
+// visually anchored to the graph.
 .CallEdge_pile {
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: transform 140ms cubic-bezier(0.22, 1, 0.36, 1), filter 140ms;
+  transform-box: fill-box;
+  transform-origin: center;
+
+  &:hover { filter: brightness(1.08) drop-shadow(0 0 4px oklch(from var(--color-accent) l c h / 0.5)); }
+  &:focus-visible { outline: none; filter: drop-shadow(0 0 4px var(--color-accent)); }
+
+  &[data-selected="true"] {
+    filter: drop-shadow(0 0 6px var(--color-accent));
+  }
+}
+
+.CallEdge_pileHit {
+  fill: transparent;
+  // Tiny stroke kept invisible just so browsers keep a tight bounding box and
+  // hit-testing stays predictable across zoom levels.
+  stroke: transparent;
 }
 
 .CallEdge_payloadBox {
-  fill: var(--color-warning-plus-1);
-  stroke: var(--color-warning-minus-2);
+  fill:   oklch(0.78 0.10 70);   // jasny karton
+  stroke: oklch(0.46 0.10 65);   // ciemna krawedz
   stroke-width: 0.6;
 }
 
@@ -23,7 +46,7 @@
 
 .CallEdge_payloadStrap,
 .CallEdge_payloadTape {
-  stroke: var(--color-warning-minus-3);
+  stroke: oklch(0.36 0.09 60);   // tasma / wiazanie
   stroke-width: 1.1;
   stroke-linecap: butt;
 }

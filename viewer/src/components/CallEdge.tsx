@@ -1,10 +1,14 @@
 // @purpose Custom edge - tight bezier curve with animated in-flight packages
-// riding along it + a static "arrived" pile at the target end. In-flight
-// packages snapshot their path so parent re-renders don't restart animations.
-// Once a package arrives, the in-flight render is replaced by the pile
-// composition (1 box for a single arrival, otherwise a symbolic 3-4 stacked
-// package cluster).
-import { memo, useMemo, useRef } from 'react'
+// riding along it + a static "arrived" pile at the target end.
+//
+// Animation strategy: requestAnimationFrame + getPointAtLength on the LIVE path.
+// Duration is snapshotted at mount (predictable tempo) but the path is read
+// from a ref that updates every render - so when a layout (tree/radial/lanes)
+// re-positions nodes, the package smoothly tracks the NEW trajectory instead
+// of drifting along a stale snapshot. This keeps behaviour identical across
+// every layout: grouped (stable), lanes (mostly stable), tree (full re-layout
+// per change), radial (per-layer angular shuffle on every new node).
+import { memo, useEffect, useMemo, useRef } from 'react'
 import {
   BaseEdge,
   getBezierPath,
@@ -12,6 +16,7 @@ import {
   type Edge,
 } from '@xyflow/react'
 import type { CallEdgeData } from '../hooks/useCallGraph'
+import { useEdgeSelection } from './EdgeSelectionContext'
 
 // React Flow default. Lower = tighter (near-straight on short edges),
 // higher = floppier. 0.25 keeps the curve organic but not loopy.
@@ -59,32 +64,52 @@ interface PayloadPackageProps {
   currentPath: string
 }
 
-// Snapshots path + duration on mount so layout shifts don't restart SMIL.
+// RAF-driven motion that ALWAYS reads from the current path. Duration is
+// frozen at mount so timing stays predictable across layout reshuffles.
 function PayloadPackage({ firedAt, currentPath }: PayloadPackageProps) {
-  const pathRef = useRef<string>(currentPath)
-  const durationRef = useRef<number | null>(null)
-  if (durationRef.current === null) {
-    durationRef.current = pathDuration(pathRef.current)
+  const groupRef       = useRef<SVGGElement | null>(null)
+  const currentPathRef = useRef(currentPath)
+  currentPathRef.current = currentPath // live mirror of latest prop into the RAF closure
+
+  const startRef    = useRef<number>(0)
+  const durationRef = useRef<number>(0)
+  if (durationRef.current === 0) {
+    startRef.current    = performance.now()
+    durationRef.current = pathDuration(currentPath)
   }
-  const path = pathRef.current
-  const duration = durationRef.current
-  const off = packageOffset(firedAt)
+
+  useEffect(() => {
+    let raf = 0
+    // Single reusable path element - avoids per-frame DOM allocation. Sits
+    // detached from the tree; only used to call getTotalLength/Point.
+    const probe = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+
+    function tick() {
+      const elapsed = performance.now() - startRef.current
+      const p = Math.min(1, elapsed / durationRef.current)
+      const g = groupRef.current
+      if (g) {
+        probe.setAttribute('d', currentPathRef.current)
+        const len = probe.getTotalLength()
+        const pt  = probe.getPointAtLength(p * len)
+        g.setAttribute('transform', `translate(${pt.x.toFixed(2)} ${pt.y.toFixed(2)})`)
+      }
+      if (p < 1) raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [])
+
+  const off = useMemo(() => packageOffset(firedAt), [firedAt])
 
   return (
-    <g className="CallEdge_payload">
+    <g ref={groupRef} className="CallEdge_payload">
       <g transform={`translate(${off.x.toFixed(2)} ${off.y.toFixed(2)})`}>
         <rect className="CallEdge_payloadShadow" x="-9" y="-7" width="18" height="14" rx="2.5" />
         <rect className="CallEdge_payloadBox"    x="-8" y="-6" width="16" height="12" rx="2" />
         <line className="CallEdge_payloadStrap"  x1="0"  y1="-6" x2="0" y2="6" />
         <line className="CallEdge_payloadTape"   x1="-8" y1="0"  x2="8" y2="0" />
       </g>
-      <animateMotion
-        dur={`${duration}ms`}
-        begin="0s"
-        repeatCount="1"
-        fill="freeze"
-        path={path}
-      />
     </g>
   )
 }
@@ -94,12 +119,18 @@ interface ArrivedPileProps {
   isMulti: boolean
   x: number
   y: number
+  selected: boolean
+  onSelect: (id: string) => void
 }
 
 // Symbolic pile at the target end. 1 box for single arrival, 3-4 randomly
 // stacked boxes for multi (capped - we never render more than 4 regardless
 // of how many packages actually arrived).
-function ArrivedPile({ edgeId, isMulti, x, y }: ArrivedPileProps) {
+//
+// Pile is the ONLY interactive part of the edge - cursor + hit area come from
+// CSS (.CallEdge_pile pointer-events: auto). Clicking opens the right sidebar
+// with the full payload list for this edge.
+function ArrivedPile({ edgeId, isMulti, x, y, selected, onSelect }: ArrivedPileProps) {
   const positions = useMemo(() => {
     const h = hashString(edgeId)
     const want = isMulti ? 3 + (h % 2) : 1
@@ -118,7 +149,21 @@ function ArrivedPile({ edgeId, isMulti, x, y }: ArrivedPileProps) {
   }, [edgeId, isMulti])
 
   return (
-    <g className="CallEdge_pile" transform={`translate(${x} ${y})`}>
+    <g
+      className="CallEdge_pile"
+      data-selected={selected ? 'true' : 'false'}
+      transform={`translate(${x} ${y})`}
+      onClick={(ev) => {
+        ev.stopPropagation()
+        onSelect(edgeId)
+      }}
+      role="button"
+      tabIndex={0}
+      aria-label={`show payloads on this edge${isMulti ? ' (multiple)' : ''}`}
+    >
+      {/* Invisible hit-area expands the clickable region around the pile so
+          a narrow stack is still easy to tap on a touch screen. */}
+      <circle className="CallEdge_pileHit" cx="0" cy="0" r="14" />
       {positions.map((p, i) => (
         <g key={i} transform={`translate(${p.x.toFixed(2)} ${p.y.toFixed(2)}) rotate(${p.rot.toFixed(1)})`}>
           <rect className="CallEdge_payloadShadow" x="-9" y="-7" width="18" height="14" rx="2.5" />
@@ -149,6 +194,9 @@ function CallEdgeImpl({
     curvature: EDGE_CURVATURE,
   })
 
+  const { selectedEdgeId, selectEdge } = useEdgeSelection()
+  const isSelected = selectedEdgeId === id
+
   const hasArgs = data?.hasArgs ?? false
   const recentFires = data?.recentFires ?? []
   const totalCount = data?.count ?? 0
@@ -174,7 +222,14 @@ function CallEdgeImpl({
             <PayloadPackage key={firedAt} firedAt={firedAt} currentPath={path} />
           ))}
           {arrivedCount > 0 && (
-            <ArrivedPile edgeId={id} isMulti={arrivedCount > 1} x={targetX} y={targetY} />
+            <ArrivedPile
+              edgeId={id}
+              isMulti={arrivedCount > 1}
+              x={targetX}
+              y={targetY}
+              selected={isSelected}
+              onSelect={selectEdge}
+            />
           )}
         </>
       )}
