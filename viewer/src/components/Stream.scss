@@ -9,6 +9,11 @@
   font-family: var(--font-mono);
   font-size: 0.85rem;
 
+  .is-mobile & {
+    padding: 0.35rem 0.45rem 0.6rem;
+    gap: 0.3rem;
+  }
+
   &::-webkit-scrollbar       { width: 10px; }
   &::-webkit-scrollbar-track { background: transparent; }
   &::-webkit-scrollbar-thumb {
@@ -17,4 +22,36 @@
 
     &:hover { background: var(--surface-plus-3); }
   }
+}
+
+// Separator widoczny gdy odstep miedzy kolejnymi wpisami >= 5s. Gruby pasek
+// (5px) podzielony etykieta z dlugoscia ciszy, zeby od razu bylo widac kiedy
+// procesowanie sie zatrzymalo i wznowilo.
+.Stream_gap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.4rem 0;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 5px;
+    background: var(--surface-plus-3);
+    border-radius: 2px;
+  }
+}
+
+.Stream_gapLabel {
+  flex: 0 0 auto;
+  padding: 0.1rem 0.5rem;
+  background: var(--surface-plus-1);
+  border: 1px solid var(--surface-plus-3);
+  border-radius: 999px;
 }

@@ -1,6 +1,9 @@
 // @purpose Scrollable list area - auto-sticks to bottom, shows demo samples when empty.
-import { useEffect, useMemo, useRef } from 'react'
+// Renderuje separator pomiedzy wpisami gdy odstep timestampow >= GAP_THRESHOLD_MS,
+// zeby gole oko widzialo "tutaj cos sie dzialo, potem cisza, potem nowe logi".
+import { Fragment, useEffect, useMemo, useRef } from 'react'
 import { Entry } from './Entry'
+import { formatGap } from '../utils/format'
 import type { LogLevel, StreamItem } from '../types'
 
 interface StreamProps {
@@ -8,6 +11,7 @@ interface StreamProps {
 }
 
 const DEMO_LEVELS: LogLevel[] = ['log', 'info', 'warn', 'error', 'debug']
+const GAP_THRESHOLD_MS = 5000
 
 function buildDemoItems(): StreamItem[] {
   const now = Date.now()
@@ -47,9 +51,21 @@ export function Stream({ items }: StreamProps) {
 
   return (
     <main className="Stream" data-state={isEmpty ? 'empty' : 'live'} ref={ref} onScroll={handleScroll}>
-      {visible.map((item, i) => (
-        <Entry key={i} item={item} />
-      ))}
+      {visible.map((item, i) => {
+        const prev = i > 0 ? visible[i - 1] : null
+        const gapMs = prev ? item.entry.timestamp - prev.entry.timestamp : 0
+        const showGap = !isEmpty && gapMs >= GAP_THRESHOLD_MS
+        return (
+          <Fragment key={i}>
+            {showGap && (
+              <div className="Stream_gap" role="separator" aria-label={`gap ${formatGap(gapMs)}`}>
+                <span className="Stream_gapLabel">{formatGap(gapMs)} silence</span>
+              </div>
+            )}
+            <Entry item={item} />
+          </Fragment>
+        )
+      })}
     </main>
   )
 }
