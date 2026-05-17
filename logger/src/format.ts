@@ -8,6 +8,7 @@ const EMOJI: Record<LogLevel, string> = {
   warn: '[warn]',
   error: '[error]',
   debug: '[debug]',
+  success: '[success]',
 }
 
 /**

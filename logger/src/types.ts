@@ -1,6 +1,6 @@
 // @purpose Shared type definitions for the entire devlogger surface.
 
-export type LogLevel = 'log' | 'warn' | 'error' | 'info' | 'debug'
+export type LogLevel = 'log' | 'warn' | 'error' | 'info' | 'debug' | 'success'
 
 export interface LogEntry {
   level: LogLevel

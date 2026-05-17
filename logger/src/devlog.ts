@@ -13,6 +13,7 @@ export interface DevLog {
   warn: (...args: unknown[]) => void
   error: (...args: unknown[]) => void
   debug: (...args: unknown[]) => void
+  success: (...args: unknown[]) => void
   group: (label?: unknown) => void
   groupEnd: () => void
   exec: <TArgs extends unknown[], TReturn>(call: ExecCall<TArgs, TReturn>) => TReturn | undefined
@@ -73,6 +74,7 @@ export function createDevLog(scope?: string | null): DevLog {
   callable.warn = (...args) => record('warn', scopeName, args, emit)
   callable.error = (...args) => record('error', scopeName, args, emit)
   callable.debug = (...args) => record('debug', scopeName, args, emit)
+  callable.success = (...args) => record('success', scopeName, args, emit)
 
   callable.group = (label?: unknown) => {
     if (!isEnabled() || isScopeMuted(scopeName)) return
