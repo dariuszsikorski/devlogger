@@ -1,13 +1,18 @@
 // @purpose Graph view - React Flow CSS var overrides + semantic tokens dla paneli i empty-state.
-// WSZYSTKIE wymiary w PX (panele, fonty, paddingi) - graph nie skaluje sie z font-sliderem, layouty operuja na px constants.
+// CHROME (panele info, layout switch, controls, side panels, empty-state) uzywa REM - skaluje sie z font-sliderem aplikacji.
+// CANVAS CONTENT (nodes, edges, layouts) zostaje w PX bo ma wlasny system zoomu/skalowania ReactFlow.
+// Hairlines (1px borders) zostaja w px dla ostrosci na fizycznym pikselu.
 @use './CallNode.scss';
 @use './ScopeGroup.scss';
 @use './CallEdge.scss';
 
 .Graph {
   flex: 1;
-  position: relative;
+  display: flex;
+  flex-direction: row;
   min-height: 0;
+  min-width: 0;
+  overflow: hidden; // prevent any internal overflow from causing page-level horizontal scroll
   background: var(--surface-base);
 
   .react-flow {
@@ -24,22 +29,42 @@
     --xy-controls-button-background-color-hover-default: var(--surface-plus-3);
     --xy-controls-button-color-default:                  var(--color-text);
     --xy-controls-button-border-color-default:           var(--surface-minus-2);
+  }
 
-    --xy-minimap-background-color-default: var(--surface-plus-1);
+  // ReactFlow Controls default = 26x26px / 4px padding / 12px svg. Konwersja
+  // na rem zeby skalowaly sie z reszta UI; cala reszta Controls (kolory) jest
+  // sterowana przez xyflow CSS vars wyzej.
+  .react-flow__controls-button {
+    width: 2rem;
+    height: 2rem;
+    padding: 0.31rem;
+    svg { max-width: 0.92rem; max-height: 0.92rem; }
   }
 
   .react-flow__attribution { display: none; }
 }
 
+.Graph_canvas {
+  flex: 1;
+  position: relative;
+  min-width: 0; // lets the flex child shrink so side panels take real space
+  min-height: 0;
+  // Canvas reads two surface levels darker than the surrounding chrome
+  // (side panels use --surface-plus-1) so the working area visually recedes.
+  background: var(--surface-minus-2);
+
+  .react-flow { width: 100%; height: 100%; }
+}
+
 .Graph_panel {
   display: flex;
-  gap: 12px;
+  gap: 0.92rem;
   background: var(--surface-plus-1);
   border: 1px solid var(--surface-minus-2);
-  border-radius: 6px;
-  padding: 6px 10px;
+  border-radius: 0.46rem;
+  padding: 0.46rem 0.77rem;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 0.85rem;
 }
 
 .Graph_layoutPanel {
@@ -51,14 +76,14 @@
 .Graph_panelMetric {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 0.38rem;
 }
 
 .Graph_panelLabel {
   color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  font-size: 10px;
+  font-size: 0.77rem;
 }
 
 .Graph_panelValue {
@@ -74,29 +99,92 @@
   z-index: 5;
   text-align: center;
   background: var(--surface-plus-1);
-  // 2px frame, several levels darker than the panel bg so it reads clearly
+  // Frame several levels darker than the panel bg so it reads clearly
   // on both light and dark canvases.
   border: 2px solid var(--surface-minus-3);
-  border-radius: 8px;
-  padding: 16px 24px;
-  max-width: 360px;
+  border-radius: 0.62rem;
+  padding: 1.23rem 1.85rem;
+  max-width: 27.69rem;
   color: var(--color-text-muted);
-  font-size: 12px;
+  font-size: 0.92rem;
 
   p { margin: 0; }
 
   code {
     font-family: var(--font-mono);
-    font-size: 11.5px;
+    font-size: 0.88rem;
     background: var(--surface-minus-1);
-    padding: 1px 5px;
-    border-radius: 3px;
+    padding: 1px 0.38rem;
+    border-radius: 0.23rem;
     color: var(--color-info);
   }
 }
 
 .Graph_emptyHint {
-  margin-top: 6px;
-  font-size: 11px;
+  margin-top: 0.46rem;
+  font-size: 0.85rem;
   color: var(--color-text-muted);
+}
+
+// Collapsible side panels - flex siblings of .Graph_canvas so opening them
+// reflows the layout (canvas shrinks). Width transitions on the content area
+// from 0 (collapsed) to --side-panel-w (open). Sam panel jest position:
+// relative, a toggle siedzi w nim jako position: absolute na zewnetrznej
+// krawedzi, pionowo wycentrowany przez top:50% + translateY(-50%).
+.Graph_sidePanel {
+  --side-panel-w: 12rem;
+  position: relative;
+  flex: 0 0 auto; // takes only the width of its content, never grows or shrinks
+  overflow: visible; // toggle wystaje na zewnatrz wlasnej krawedzi
+  // Bez z-index lewy toggle (w DOM PRZED canvasem) bylby zaslaniany przez
+  // canvas (position:relative). Z prawym tego problemu nie ma, bo jest po
+  // canvasie w DOM. z-index:1 stawia oba panele NAD canvasem.
+  z-index: 1;
+}
+
+.Graph_sidePanelContent {
+  height: 100%;
+  width: var(--side-panel-w);
+  background: var(--surface-plus-1);
+  overflow: hidden auto;
+  padding: 0.92rem;
+  font-size: 0.92rem;
+  transition: width 220ms cubic-bezier(0.22, 1, 0.36, 1);
+
+  .Graph_sidePanel.is-left  & { border-right: 1px solid var(--surface-minus-2); }
+  .Graph_sidePanel.is-right & { border-left:  1px solid var(--surface-minus-2); }
+
+  .Graph_sidePanel[data-open="false"] & {
+    width: 0;
+    padding-left: 0;
+    padding-right: 0;
+    border-left-width: 0;
+    border-right-width: 0;
+  }
+}
+
+.Graph_sidePanelToggle {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--surface-plus-2);
+  border: 1px solid var(--surface-minus-2);
+  color: var(--color-text);
+  width: 1.69rem;
+  height: 3.38rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 120ms, color 120ms;
+
+  // Toggle siedzi po stronie kanwy panelu i wystaje 100% wlasnej szerokosci
+  // do srodka kanwy. Dzieki temu nawet gdy panel ma width:0 (collapsed),
+  // toggle pozostaje widoczny - nie chowa sie w overflow:hidden .Graph.
+  // -1px zeby nakladal sie na 1px border panelu, bez wizualnej szpary.
+  .Graph_sidePanel.is-left  & { left:  calc(100% - 1px); border-radius: 0 0.46rem 0.46rem 0; border-left:  0; }
+  .Graph_sidePanel.is-right & { right: calc(100% - 1px); border-radius: 0.46rem 0 0 0.46rem; border-right: 0; }
+
+  &:hover         { background: var(--surface-plus-3); }
+  &:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 1px; }
 }
