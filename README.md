@@ -185,15 +185,47 @@ log.exec({ by: 'CheckoutPage', target: 'addItem', args: { sku: 'X' } })
 // -> [Cart] CheckoutPage called addItem with args: { sku: 'X' }
 
 // Wrap a real function call - logs it, runs it, returns the result.
+// Prefer a named function (defined nearby or imported) over an inline arrow:
+function computeTotal(xs) {
+  return xs.reduce((s, x) => s + x.price, 0)
+}
+
 const total = log.exec({
   by: 'CheckoutPage',
   target: 'computeTotal',
   args: [items],
-  fn: (xs) => xs.reduce((s, x) => s + x.price, 0),
+  fn: () => computeTotal(items),
 })
 // -> [Cart] CheckoutPage called computeTotal with args: [ ... ]
 //    (computeTotal is then executed and its return value is returned through)
 ```
+
+#### Convention: keep `fn` a named function, not an inline body
+
+Pass `fn` as a reference to a function that lives **outside** the `exec` call - either declared right above it, exported from the same file, or imported from another module. Avoid stuffing the whole implementation into an inline `async () => { ... }`.
+
+Why this matters:
+
+- **Readability** - the `exec` block stays a flat 4-field descriptor (by / target / args / fn) that you can scan in one glance. The actual logic lives where you'd normally write it.
+- **Graduation path** - prototypes built this way port cleanly to production. To remove instrumentation you just call the function directly; nothing has to be unwrapped from inside an arrow.
+- **Reuse** - the same function can be invoked from several call sites (each with its own `by` and curated `args`) without duplicating the body.
+- **Debugging** - named functions show up by name in stack traces, profiler flame graphs, and the viewer.
+
+In practice `log.exec` is typically used at **module boundaries** - one function delegating to another, often imported from a different file. The target function doesn't need to live next to the `exec`; it just needs to be importable / in scope:
+
+```ts
+import { findProduct } from './db.mjs'
+
+// db.findProduct is defined in db.mjs - we just call it here through exec
+log.exec({
+  by: 'apiRoute.handleGetProduct',
+  target: 'db.findProduct',
+  args: { id },
+  fn: () => findProduct(id),
+})
+```
+
+When you do need a small helper to bind arguments at the call site (the `() => fn(x)` arrow above), that's the *one* shape of inline closure worth keeping - it's a tiny trampoline, not the implementation.
 
 The output format adapts to what you supply - missing pieces are dropped gracefully:
 
