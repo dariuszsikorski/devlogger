@@ -5,10 +5,19 @@
   // border-box so the 2px border counts inside the React Flow node bounds
   // (otherwise the frame visually extends past the measured group width).
   box-sizing: border-box;
-  background: var(--surface-minus-1);
-  // Border = 3 levels darker than bg (minus-1 -> minus-4) for a clear,
-  // theme-aware frame on both light and dark surfaces.
-  border: 2px solid var(--surface-minus-4);
+  // Scope frame sits one level lighter than the canvas (canvas uses
+  // --surface-minus-1) so groups read as elevated content on the workspace.
+  background: var(--surface-base);
+  // Asymmetric border for a directional depth cue: top + left lighter
+  // (highlight side), right + bottom darker (shadow side). Reads as
+  // light-from-top-left lighting.
+  border: 2px solid var(--surface-minus-2);
+  border-right-color:  var(--surface-minus-4);
+  border-bottom-color: var(--surface-minus-5);
+  // Hard-edged drop shadow - 0 blur for a crisp offset stamp. Color derives
+  // from the darkest surface step with ~35% alpha so it stays subtle and
+  // blends with whatever the canvas color happens to be.
+  box-shadow: 0.25rem 0.25rem 0 0 oklch(from var(--surface-minus-5) l c h / 0.15);
   border-radius: 10px;
   padding-top: 0;
   position: relative;
