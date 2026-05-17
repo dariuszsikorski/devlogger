@@ -1,12 +1,17 @@
 // @purpose Root - holds entry buffer + filter state, switches between Stream and Graph views.
-import { useCallback, useMemo, useState } from 'react'
+// Entries are persisted to IndexedDB so a tab cold-kill or reload restores the live view.
+// Heartbeat detects suspension gaps - on a long gap we soft-reset (live events only, no replay).
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Header } from './components/Header'
 import { Filters } from './components/Filters'
 import { Stream } from './components/Stream'
 import { Graph } from './components/Graph'
+import { GapNotice } from './components/GapNotice'
 import { useStream } from './hooks/useStream'
+import { useHeartbeat } from './hooks/useHeartbeat'
 import { useSemanticColors } from './useSemanticColors'
 import { formatArgs } from './utils/format'
+import { clearEntries, getAllEntries, putEntries } from './storage/entriesDb'
 import type { ViewKey } from './components/ViewSwitch'
 import type { StreamItem } from './types'
 
@@ -23,6 +28,9 @@ export function App() {
   const [levelFilter, setLevelFilter] = useState('')
   const [view, setView] = useState<ViewKey>('stream')
 
+  const [gapMs, setGapMs] = useState<number | null>(null)
+  const [gapLastBeatAt, setGapLastBeatAt] = useState<number | null>(null)
+
   const onBatch = useCallback((items: StreamItem[]) => {
     setEntries((prev) => {
       const next = prev.concat(items)
@@ -37,9 +45,42 @@ export function App() {
       }
       return changed ? [...seen].sort() : prev
     })
+    // Best-effort persistence - never blocks the live render.
+    void putEntries(items)
   }, [])
 
   const { isConnected } = useStream(onBatch)
+
+  const handleGap = useCallback((ms: number, lastBeatAt: number) => {
+    setEntries([])
+    setApps([])
+    void clearEntries()
+    setGapMs(ms)
+    setGapLastBeatAt(lastBeatAt)
+  }, [])
+  const { initialChecked } = useHeartbeat({ onGap: handleGap })
+
+  // Hydrate from IDB AFTER cold-start gap check finished. Merges with whatever
+  // live entries already arrived so a fast WS connect doesn't get overwritten.
+  useEffect(() => {
+    if (!initialChecked) return
+    let cancelled = false
+    void getAllEntries().then((stored) => {
+      if (cancelled || stored.length === 0) return
+      setEntries((current) => {
+        const merged = stored.concat(current)
+        if (merged.length > MAX_ENTRIES) merged.splice(0, merged.length - MAX_ENTRIES)
+        return merged
+      })
+      setApps((current) => {
+        const seen = new Set(current)
+        let changed = false
+        for (const it of stored) if (it.appId && !seen.has(it.appId)) { seen.add(it.appId); changed = true }
+        return changed ? [...seen].sort() : current
+      })
+    })
+    return () => { cancelled = true }
+  }, [initialChecked])
 
   const visible = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -52,7 +93,15 @@ export function App() {
     })
   }, [entries, search, appFilter, levelFilter])
 
-  const handleClear = useCallback(() => setEntries([]), [])
+  const handleClear = useCallback(() => {
+    setEntries([])
+    void clearEntries()
+  }, [])
+
+  const dismissGap = useCallback(() => {
+    setGapMs(null)
+    setGapLastBeatAt(null)
+  }, [])
 
   const isGraph = view === 'graph'
 
@@ -78,6 +127,7 @@ export function App() {
         />
       )}
       {isGraph ? <Graph entries={entries} /> : <Stream items={visible} />}
+      <GapNotice gapMs={gapMs} lastBeatAt={gapLastBeatAt} onDismiss={dismissGap} />
     </div>
   )
 }

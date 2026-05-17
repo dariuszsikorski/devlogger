@@ -1,0 +1,54 @@
+// @purpose Toast container - top-right, surface-plus-2 panel z accent border, persistent until dismiss.
+.GapNotice {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 100;
+  max-width: 22rem;
+  padding: 0.75rem 2.2rem 0.85rem 0.9rem;
+  background: var(--surface-plus-2);
+  border: 1px solid oklch(from var(--color-accent) l c h / 0.45);
+  border-radius: 8px;
+  color: var(--color-text);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  box-shadow: 0 8px 24px oklch(from var(--surface-base) clamp(0, calc(l - 0.18), 1) c h / 0.45);
+  animation: GapNotice-in 200ms ease-out;
+}
+
+.GapNotice_title {
+  font-weight: 600;
+  font-size: 0.82rem;
+  color: var(--color-accent);
+  margin-bottom: 0.25rem;
+}
+
+.GapNotice_body {
+  color: var(--color-text-muted);
+}
+
+.GapNotice_close {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.45rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color 120ms, border-color 120ms, background 120ms;
+
+  &[data-hovered]       { color: var(--color-text); background: var(--surface-plus-3); }
+  &[data-pressed]       { background: var(--surface-plus-4); }
+  &[data-focus-visible] { outline: 2px solid var(--color-accent); outline-offset: 1px; }
+}
+
+@keyframes GapNotice-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
