@@ -25,6 +25,7 @@ body {
   font-size: 0.85rem;
   background: var(--surface-base);
   color: var(--color-text);
+  overflow: hidden; // app is full-viewport, never scroll the page itself
 }
 
 .App {
