@@ -8,7 +8,7 @@ import {
   OverlayArrow,
   Popover,
 } from 'react-aria-components'
-import { Circle, Sliders, Trash2 } from 'lucide-react'
+import { Circle, RefreshCw, Sliders, Trash2 } from 'lucide-react'
 import { ThemeSlider } from './ThemeSlider'
 import { FontSizeSlider } from './FontSizeSlider'
 import { ViewSwitch, type ViewKey } from './ViewSwitch'
@@ -18,6 +18,7 @@ interface HeaderProps {
   visibleCount: number
   totalCount: number
   onClear: () => void
+  onResend: () => void
   view: ViewKey
   onViewChange: (v: ViewKey) => void
 }
@@ -27,6 +28,7 @@ export function Header({
   visibleCount,
   totalCount,
   onClear,
+  onResend,
   view,
   onViewChange,
 }: HeaderProps) {
@@ -77,6 +79,11 @@ export function Header({
             ? `${totalCount} entries`
             : `${visibleCount} / ${totalCount} entries`}
         </span>
+
+        <Button className="Header_clear" onPress={onResend} aria-label="resend recent logs from broker">
+          <RefreshCw size={14} />
+          resend
+        </Button>
 
         <Button className="Header_clear" onPress={onClear}>
           <Trash2 size={14} />

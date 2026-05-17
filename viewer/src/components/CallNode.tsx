@@ -1,7 +1,19 @@
 // @purpose Custom React Flow node - shows function name + scope + counters, pulses on fire.
+// Per-level icon + persistent border tint (driven by `data.lastLevel`) so user sees scope status at a glance.
 import { memo, useEffect, useRef } from 'react'
 import { Handle, Position, type NodeProps, type Node } from '@xyflow/react'
+import { CheckCircle2, AlertTriangle, XCircle, Info, Bug, Circle, type LucideIcon } from 'lucide-react'
+import type { LogLevel } from '../types'
 import type { CallNodeData } from '../hooks/useCallGraph'
+
+const LEVEL_ICON: Record<LogLevel, LucideIcon> = {
+  success: CheckCircle2,
+  error:   XCircle,
+  warn:    AlertTriangle,
+  info:    Info,
+  debug:   Bug,
+  log:     Circle,
+}
 
 type CallNodeType = Node<CallNodeData, 'call'>
 
@@ -38,24 +50,32 @@ function CallNodeImpl({ data }: NodeProps<CallNodeType>) {
   }, [data.firedAt])
 
   const counts = data.counts
-  const hasWarn  = counts.warn  > 0
-  const hasError = counts.error > 0
-  const hasInfo  = counts.info  > 0
-  const hasDebug = counts.debug > 0
+  const hasWarn    = counts.warn    > 0
+  const hasError   = counts.error   > 0
+  const hasInfo    = counts.info    > 0
+  const hasDebug   = counts.debug   > 0
+  const hasSuccess = counts.success > 0
 
   const kind     = data.isFnNode ? 'fn' : 'scope'
-  const lastLevel = data.lastLevel || undefined
+  const lastLevel: LogLevel | undefined = (data.lastLevel || undefined) as LogLevel | undefined
+  const Icon = lastLevel ? LEVEL_ICON[lastLevel] : null
+  const isClickable = Array.isArray(data.lastArgs) && data.lastArgs.length > 0
 
   return (
-    <div className="CallNode" ref={ref} data-kind={kind} data-last={lastLevel}>
+    <div className="CallNode" ref={ref} data-kind={kind} data-last={lastLevel} data-clickable={isClickable || undefined}>
       <Handle type="target" position={Position.Top}    className="CallNode_handle" />
       <Handle type="source" position={Position.Bottom} className="CallNode_handle" />
 
-      {data.callCount > 0 && (
+      {(data.callCount > 0 || Icon) && (
         <div className="CallNode_header">
-          <span className="CallNode_callCount" title={`called ${data.callCount}x`}>
-            x{data.callCount}
-          </span>
+          {Icon && (
+            <Icon className="CallNode_levelIcon" size={12} aria-label={`last level: ${lastLevel}`} />
+          )}
+          {data.callCount > 0 && (
+            <span className="CallNode_callCount" title={`called ${data.callCount}x`}>
+              x{data.callCount}
+            </span>
+          )}
         </div>
       )}
 
@@ -63,12 +83,13 @@ function CallNodeImpl({ data }: NodeProps<CallNodeType>) {
         {data.label}
       </div>
 
-      {(hasWarn || hasError || hasInfo || hasDebug) && (
+      {(hasWarn || hasError || hasInfo || hasDebug || hasSuccess) && (
         <div className="CallNode_counters">
-          {hasError && <span className="CallNode_chip" data-variant="error" title="errors">err {counts.error}</span>}
-          {hasWarn  && <span className="CallNode_chip" data-variant="warn"  title="warnings">warn {counts.warn}</span>}
-          {hasInfo  && <span className="CallNode_chip" data-variant="info"  title="info">info {counts.info}</span>}
-          {hasDebug && <span className="CallNode_chip" data-variant="debug" title="debug">dbg {counts.debug}</span>}
+          {hasError   && <span className="CallNode_chip" data-variant="error"   title="errors">err {counts.error}</span>}
+          {hasSuccess && <span className="CallNode_chip" data-variant="success" title="success">ok {counts.success}</span>}
+          {hasWarn    && <span className="CallNode_chip" data-variant="warn"    title="warnings">warn {counts.warn}</span>}
+          {hasInfo    && <span className="CallNode_chip" data-variant="info"    title="info">info {counts.info}</span>}
+          {hasDebug   && <span className="CallNode_chip" data-variant="debug"   title="debug">dbg {counts.debug}</span>}
         </div>
       )}
 

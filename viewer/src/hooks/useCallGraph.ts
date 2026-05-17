@@ -18,6 +18,9 @@ export interface CallNodeData {
   counts: Record<LogLevel, number>
   lastMessage: string
   lastLevel: LogLevel | ''
+  /** Raw args of the most recent non-exec entry on this node - feeds the click-to-detail dialog. */
+  lastArgs?: unknown[]
+  lastTimestamp?: number
   [key: string]: unknown
 }
 
@@ -187,7 +190,7 @@ function ensureGroupNode(state: GraphState, appId: string, scope: string): strin
     height: initialH,
     style: { width: GROUP_W, height: initialH },
     selectable: true,
-    draggable: true,
+    draggable: false,
     data: {
       appId,
       scope,
@@ -246,7 +249,7 @@ function ensureFnNode(
       callCount: 0,
       isFnNode: true,
       lockedScope: source === 'by',
-      counts: { log: 0, info: 0, warn: 0, error: 0, debug: 0 },
+      counts: { log: 0, info: 0, warn: 0, error: 0, debug: 0, success: 0 },
       lastMessage: '',
       lastLevel: '',
     },
@@ -317,7 +320,7 @@ function ensureScopeNode(
       callCount: 0,
       isFnNode: false,
       lockedScope: true,
-      counts: { log: 0, info: 0, warn: 0, error: 0, debug: 0 },
+      counts: { log: 0, info: 0, warn: 0, error: 0, debug: 0, success: 0 },
       lastMessage: '',
       lastLevel: '',
     },
@@ -330,7 +333,7 @@ function bumpNode(
   state: GraphState,
   id: string,
   firedAt: number,
-  patch: { incCall?: boolean; level?: LogLevel; message?: string } = {},
+  patch: { incCall?: boolean; level?: LogLevel; message?: string; args?: unknown[]; timestamp?: number } = {},
 ): void {
   const prev = state.nodes.get(id) as Node<CallNodeData> | undefined
   if (!prev) return
@@ -345,6 +348,8 @@ function bumpNode(
       counts,
       lastMessage: patch.message ?? prev.data.lastMessage,
       lastLevel: patch.level ?? prev.data.lastLevel,
+      lastArgs: patch.args ?? prev.data.lastArgs,
+      lastTimestamp: patch.timestamp ?? prev.data.lastTimestamp,
     },
   })
 }
@@ -525,7 +530,12 @@ function processItem(item: StreamItem, state: GraphState): void {
   const message = entry.args
     .map((a) => (typeof a === 'string' ? a : safeStringify(a)))
     .join(' ')
-  bumpNode(state, sid, firedAt, { level: entry.level, message })
+  bumpNode(state, sid, firedAt, {
+    level: entry.level,
+    message,
+    args: entry.args,
+    timestamp: entry.timestamp || firedAt,
+  })
 }
 
 function safeStringify(v: unknown): string {

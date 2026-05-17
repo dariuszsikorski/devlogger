@@ -432,6 +432,29 @@ Notes:
 - The tunnel is public for anyone who guesses the URL. Treat the viewer as anonymous read-only - no secrets in your log payloads while a tunnel is open.
 - Override the local port with `DEVLOGGER_PORT` (default `9777`).
 
+### Pointing a producer at the broker
+
+Two equivalent ways - env var or in-code `configure()`. **The URL must end in `/ingest`** (the WS route the broker registers for producers); `transport.ts` uses the URL verbatim, no path is appended.
+
+```sh
+# env var - simplest
+DEVLOGGER_URL=ws://127.0.0.1:9777/ingest node my-script.mjs
+```
+
+```ts
+// in-code - same effect
+import { configure } from '@dariuszsikorski/devlogger'
+configure({
+  transport: {
+    enabled: true,
+    url: 'ws://127.0.0.1:9777/ingest',
+    appId: 'my-script',
+  },
+})
+```
+
+Verify with `curl http://127.0.0.1:9777/health` - `totalRelayed` increments on every shipped entry, `consumers` reflects connected viewer tabs. Common slip: omitting `/ingest` (silent fail, `totalRelayed` stays 0) or putting `appId` at the top level of `configure()` instead of inside `transport` (ignored).
+
 Files are kept small and single-purpose to make future tests and contributions straightforward.
 
 ## Programmatic control - integrating headless orchestrators

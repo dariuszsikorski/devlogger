@@ -10,7 +10,7 @@ interface StreamProps {
   items: StreamItem[]
 }
 
-const DEMO_LEVELS: LogLevel[] = ['log', 'info', 'warn', 'error', 'debug']
+const DEMO_LEVELS: LogLevel[] = ['log', 'info', 'warn', 'error', 'debug', 'success']
 const GAP_THRESHOLD_MS = 5000
 
 function buildDemoItems(): StreamItem[] {

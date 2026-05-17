@@ -10,11 +10,19 @@
 
   &:hover { background: var(--surface-plus-2); }
 
-  &[data-level="log"]   { border-left-color: var(--color-neutral); }
-  &[data-level="info"]  { border-left-color: var(--color-info);    }
-  &[data-level="warn"]  { border-left-color: var(--color-warning); }
-  &[data-level="error"] { border-left-color: var(--color-alert);   }
-  &[data-level="debug"] { border-left-color: var(--color-debug);   }
+  &[data-level="log"]     { border-left-color: var(--color-neutral); }
+  &[data-level="info"]    { border-left-color: var(--color-info);    }
+  &[data-level="success"] { border-left-color: var(--color-success); }
+  &[data-level="warn"]    { border-left-color: var(--color-warning); }
+  &[data-level="error"]   { border-left-color: var(--color-alert);   }
+  &[data-level="debug"]   { border-left-color: var(--color-debug);   }
+
+  &[data-clickable="true"] {
+    cursor: pointer;
+
+    &:hover { background: var(--surface-plus-2); outline: 1px solid var(--surface-minus-1); }
+    &:focus-visible { outline: 2px solid var(--color-info); outline-offset: 1px; }
+  }
 
   // Mobile: 2 rzedy. Gora = metadane (czas, level, app). Dol = body pelnej szerokosci.
   // Inaczej sztywne 24.7rem kolumn wypycha tresc poza ekran 360px.
@@ -51,10 +59,11 @@
   border: 1px solid var(--surface-minus-2);
   background: var(--surface-plus-2);
 
-  .Entry[data-level="info"]  & { color: var(--color-info);    background: oklch(from var(--color-info)    l c h / 0.14); border-color: oklch(from var(--color-info)    l c h / 0.35); }
-  .Entry[data-level="warn"]  & { color: var(--color-warning); background: oklch(from var(--color-warning) l c h / 0.16); border-color: oklch(from var(--color-warning) l c h / 0.35); }
-  .Entry[data-level="error"] & { color: var(--color-alert);   background: oklch(from var(--color-alert)   l c h / 0.14); border-color: oklch(from var(--color-alert)   l c h / 0.40); }
-  .Entry[data-level="debug"] & { color: var(--color-debug);   background: oklch(from var(--color-debug)   l c h / 0.12); border-color: oklch(from var(--color-debug)   l c h / 0.32); }
+  .Entry[data-level="info"]    & { color: var(--color-info);    background: oklch(from var(--color-info)    l c h / 0.14); border-color: oklch(from var(--color-info)    l c h / 0.35); }
+  .Entry[data-level="success"] & { color: var(--color-success); background: oklch(from var(--color-success) l c h / 0.14); border-color: oklch(from var(--color-success) l c h / 0.35); }
+  .Entry[data-level="warn"]    & { color: var(--color-warning); background: oklch(from var(--color-warning) l c h / 0.16); border-color: oklch(from var(--color-warning) l c h / 0.35); }
+  .Entry[data-level="error"]   & { color: var(--color-alert);   background: oklch(from var(--color-alert)   l c h / 0.14); border-color: oklch(from var(--color-alert)   l c h / 0.40); }
+  .Entry[data-level="debug"]   & { color: var(--color-debug);   background: oklch(from var(--color-debug)   l c h / 0.12); border-color: oklch(from var(--color-debug)   l c h / 0.32); }
 
   .is-mobile & {
     grid-area: level;

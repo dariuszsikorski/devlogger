@@ -1,0 +1,57 @@
+.LogDetailDialog_route {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.LogDetailDialog_level {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: var(--surface-plus-2);
+  border: 1px solid var(--surface-minus-2);
+
+  &[data-level="info"]    { color: var(--color-info);    background: oklch(from var(--color-info)    l c h / 0.14); border-color: oklch(from var(--color-info)    l c h / 0.35); }
+  &[data-level="success"] { color: var(--color-success); background: oklch(from var(--color-success) l c h / 0.14); border-color: oklch(from var(--color-success) l c h / 0.35); }
+  &[data-level="warn"]    { color: var(--color-warning); background: oklch(from var(--color-warning) l c h / 0.16); border-color: oklch(from var(--color-warning) l c h / 0.35); }
+  &[data-level="error"]   { color: var(--color-alert);   background: oklch(from var(--color-alert)   l c h / 0.14); border-color: oklch(from var(--color-alert)   l c h / 0.40); }
+  &[data-level="debug"]   { color: var(--color-debug);   background: oklch(from var(--color-debug)   l c h / 0.12); border-color: oklch(from var(--color-debug)   l c h / 0.32); }
+}
+
+.LogDetailDialog_app   { font-weight: 500; }
+.LogDetailDialog_scope { color: var(--color-text-muted); font-size: 0.85em; }
+
+.LogDetailDialog_body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.LogDetailDialog_section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.LogDetailDialog_label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+}
+
+.LogDetailDialog_text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: var(--surface-minus-1);
+  padding: 0.6rem 0.7rem;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  margin: 0;
+}

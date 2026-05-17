@@ -10,6 +10,7 @@ import {
   Panel,
   type Edge,
   type DefaultEdgeOptions,
+  type Node,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
@@ -18,11 +19,12 @@ import { ScopeGroup } from './ScopeGroup'
 import { CallEdge } from './CallEdge'
 import { LayoutSwitch } from './LayoutSwitch'
 import { PayloadSidebar } from './PayloadSidebar'
+import { LogDetailDialog } from './LogDetailDialog'
 import { EdgeSelectionContext } from './EdgeSelectionContext'
-import { useCallGraph, type CallEdgeData } from '../hooks/useCallGraph'
+import { useCallGraph, type CallEdgeData, type CallNodeData } from '../hooks/useCallGraph'
 import { applyLayout, type LayoutKey } from '../layouts'
 import type { GraphNode } from '../layouts/types'
-import type { StreamItem } from '../types'
+import type { LogLevel, StreamItem } from '../types'
 import { formatGap } from '../utils/format'
 
 // Mirror of Stream.tsx GAP_THRESHOLD_MS - przy tym progu graph oznacza
@@ -77,6 +79,7 @@ export function Graph({ entries, leftPanel, rightPanel }: GraphProps) {
   const [leftOpen, setLeftOpen] = useState(false)
   const [rightOpen, setRightOpen] = useState(false)
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null)
+  const [detailItem, setDetailItem] = useState<StreamItem | null>(null)
 
   // Auto-open the right panel on edge selection. We DON'T auto-close when the
   // user picks a different edge - feels more stable. They can still toggle it.
@@ -112,6 +115,24 @@ export function Graph({ entries, leftPanel, rightPanel }: GraphProps) {
   )
 
   const isEmpty = nodeCount === 0
+
+  const handleNodeClick = useCallback((_e: unknown, node: Node) => {
+    if (node.type !== 'call') return
+    const d = node.data as CallNodeData
+    const hasArgs = Array.isArray(d.lastArgs) && d.lastArgs.length > 0
+    if (!hasArgs) return
+    setDetailItem({
+      v: 1,
+      appId: d.appId ?? '',
+      entry: {
+        level: ((d.lastLevel || 'log') as LogLevel),
+        scope: d.scope ?? '',
+        args: d.lastArgs as unknown[],
+        timestamp: d.lastTimestamp ?? Date.now(),
+        count: 1,
+      },
+    })
+  }, [])
 
   // useCallGraph wewnetrznie tickuje co 300ms (setTick), wiec ten odczyt
   // odswieza sie sam bez dodatkowego interval'a tutaj.
@@ -149,9 +170,11 @@ export function Graph({ entries, leftPanel, rightPanel }: GraphProps) {
           fitViewOptions={{ padding: 0.15 }}
           minZoom={0.15}
           maxZoom={2}
-          nodesDraggable
+          nodesDraggable={false}
           nodesConnectable={false}
           elementsSelectable
+          paneClickDistance={6}
+          onNodeClick={handleNodeClick}
         >
           <Background variant={BackgroundVariant.Dots} gap={18} size={1.4} />
           <Controls showInteractive={false} />
@@ -195,6 +218,7 @@ export function Graph({ entries, leftPanel, rightPanel }: GraphProps) {
       <SidePanel side="right" open={rightOpen} onToggle={() => setRightOpen((o) => !o)}>
         {rightContent}
       </SidePanel>
+      <LogDetailDialog item={detailItem} onClose={() => setDetailItem(null)} />
     </div>
     </EdgeSelectionContext.Provider>
   )

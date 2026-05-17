@@ -15,11 +15,12 @@ import type { Key } from 'react'
 
 const LEVEL_OPTIONS = [
   { id: '',      label: 'all levels' },
-  { id: 'log',   label: 'log'   },
-  { id: 'info',  label: 'info'  },
-  { id: 'warn',  label: 'warn'  },
-  { id: 'error', label: 'error' },
-  { id: 'debug', label: 'debug' },
+  { id: 'log',     label: 'log'     },
+  { id: 'info',    label: 'info'    },
+  { id: 'success', label: 'success' },
+  { id: 'warn',    label: 'warn'    },
+  { id: 'error',   label: 'error'   },
+  { id: 'debug',   label: 'debug'   },
 ]
 
 interface FiltersProps {
