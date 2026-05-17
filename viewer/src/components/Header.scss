@@ -59,7 +59,76 @@
 
   .is-mobile & {
     gap: 0.5rem;
+
+    // Mobile: inline slidery sa ukryte - dostep przez ikone Settings ponizej,
+    // ktora otwiera popover zawierajacy te same komponenty. Hide jest scoped
+    // do bezposrednich dzieci .Header_meta, popover (poza tym kontenerem)
+    // pokazuje je normalnie.
+    > .FontSizeSlider,
+    > .ThemeSlider { display: none; }
   }
+}
+
+// Settings trigger - widoczny tylko w mobile, na desktopie slidery sa inline.
+.Header_settings {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-plus-2);
+  border: 1px solid var(--surface-minus-2);
+  color: var(--color-text-muted);
+  padding: 0.3rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 120ms, color 120ms, background 120ms;
+
+  &[data-hovered]       { background: var(--surface-plus-3); border-color: var(--color-accent); color: var(--color-accent); }
+  &[data-pressed]       { background: var(--surface-plus-4); }
+  &[data-focus-visible] { outline: 2px solid var(--color-accent); outline-offset: 1px; }
+
+  .is-mobile & { display: inline-flex; }
+}
+
+// Popover - chrome zgodne z innymi panelami (.Filters_popover wzorzec).
+.Header_settingsPopover {
+  background: var(--surface-plus-2);
+  border: 1px solid var(--surface-minus-2);
+  border-radius: 8px;
+  box-shadow: 0 0.5rem 1.5rem oklch(from var(--surface-base) clamp(0, calc(l - 0.20), 1) c h / 0.5);
+  outline: none;
+}
+
+.Header_settingsArrow {
+  fill: var(--surface-plus-2);
+  stroke: var(--surface-minus-2);
+  stroke-width: 1;
+
+  // OverlayArrow rotuje SVG zaleznie od placement - inherit pozwala stylowac w jednym miejscu.
+  &[data-placement="top"]    svg { transform: rotate(180deg); }
+  &[data-placement="right"]  svg { transform: rotate(-90deg); }
+  &[data-placement="left"]   svg { transform: rotate(90deg); }
+}
+
+.Header_settingsDialog {
+  outline: none;
+  padding: 0.75rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  min-width: 14rem;
+}
+
+.Header_settingsRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.Header_settingsLabel {
+  font-size: 0.68rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .Header_status {

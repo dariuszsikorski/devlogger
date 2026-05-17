@@ -1,6 +1,14 @@
 // @purpose Top bar - title, view switch, connection indicator, entry counter, clear action.
-import { Button } from 'react-aria-components'
-import { Circle, Trash2 } from 'lucide-react'
+// Na mobile UI scale + theme slidery siedza w popoverze za ikona Settings (Sliders),
+// bo inline w pasku nie mieszcza sie na 360px.
+import {
+  Button,
+  Dialog,
+  DialogTrigger,
+  OverlayArrow,
+  Popover,
+} from 'react-aria-components'
+import { Circle, Sliders, Trash2 } from 'lucide-react'
 import { ThemeSlider } from './ThemeSlider'
 import { FontSizeSlider } from './FontSizeSlider'
 import { ViewSwitch, type ViewKey } from './ViewSwitch'
@@ -37,6 +45,27 @@ export function Header({
       <div className="Header_meta">
         <FontSizeSlider />
         <ThemeSlider />
+
+        <DialogTrigger>
+          <Button className="Header_settings" aria-label="UI settings">
+            <Sliders size={14} />
+          </Button>
+          <Popover className="Header_settingsPopover" placement="bottom end" offset={6}>
+            <OverlayArrow className="Header_settingsArrow">
+              <svg width={12} height={12} viewBox="0 0 12 12"><path d="M0 0 L6 6 L12 0" /></svg>
+            </OverlayArrow>
+            <Dialog className="Header_settingsDialog" aria-label="UI settings">
+              <div className="Header_settingsRow">
+                <span className="Header_settingsLabel">font size</span>
+                <FontSizeSlider />
+              </div>
+              <div className="Header_settingsRow">
+                <span className="Header_settingsLabel">brightness</span>
+                <ThemeSlider />
+              </div>
+            </Dialog>
+          </Popover>
+        </DialogTrigger>
 
         <span className="Header_status" data-state={statusState}>
           <Circle className="Header_statusIcon" size={8} />

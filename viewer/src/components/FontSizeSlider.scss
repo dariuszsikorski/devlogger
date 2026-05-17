@@ -3,9 +3,6 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-
-  // Slider rozmiaru fontu - "advanced config", chowamy na telefonie.
-  .is-mobile & { display: none; }
 }
 
 .FontSizeSlider_slider {
