@@ -1,11 +1,11 @@
-// @purpose Sub-tab segmented control - jest tylko w Graphie (top-right Panel), wiec wymiary w PX (graph nie skaluje sie z font-sliderem).
+// @purpose Sub-tab segmented control - top-right chrome nad canvasem. Uzywa REM (skaluje sie z reszta UI), hairlines 1px zostaja w px.
 .LayoutSwitch {
   display: inline-flex;
   background: var(--surface-plus-1);
   border: 1px solid var(--surface-minus-2);
-  border-radius: 6px;
-  padding: 2px;
-  gap: 2px;
+  border-radius: 0.46rem;
+  padding: 0.15rem;
+  gap: 0.15rem;
   font-family: var(--font-mono);
   box-shadow: inset 0 1px var(--surface-plus-2);
 }
@@ -13,14 +13,14 @@
 .LayoutSwitch_button {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 0.38rem;
   background: transparent;
   border: none;
   color: var(--color-text-muted);
-  padding: 4px 9px;
-  border-radius: 4px;
+  padding: 0.31rem 0.69rem;
+  border-radius: 0.31rem;
   font: inherit;
-  font-size: 11px;
+  font-size: 0.85rem;
   cursor: pointer;
   transition: background 120ms, color 120ms;
 
@@ -29,6 +29,6 @@
   &[data-focus-visible] { outline: 2px solid var(--color-accent); outline-offset: 1px; }
   &[data-selected]      {
     background: var(--surface-plus-2);
-    color: var(--color-accent);
+    color: var(--color-text);
   }
 }
