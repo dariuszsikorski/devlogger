@@ -31,4 +31,15 @@
     background: var(--surface-plus-2);
     color: var(--color-text);
   }
+
+  // Mobile: kompakt - chowamy etykiete (.LayoutSwitch_label), zostaje ikona.
+  // 4 segmenty z tekstem nie miesza sie nad canvasem na 360px.
+  .is-mobile & {
+    padding: 0.3rem 0.45rem;
+    gap: 0;
+  }
+}
+
+.LayoutSwitch_label {
+  .is-mobile & { display: none; }
 }

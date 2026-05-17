@@ -1,4 +1,4 @@
-// @purpose Font size slider - drives html.style.fontSize (rem root), persists, clickable reset; fill width via --font-slider-fill in themeStyle store.
+// @purpose Font size slider - drives html.style.fontSize (rem root), persists; fill width via --font-slider-fill in themeStyle store.
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Slider, SliderThumb, SliderTrack } from 'react-aria-components'
 import { Type } from 'lucide-react'
@@ -21,6 +21,9 @@ function readSaved(): number {
 
 function applyFontSize(size: number) {
   updateTheme({ '--root-font-size': size.toFixed(1) + 'px' })
+  // Sygnal dla useViewportClass - po zmianie skali UI prog mobile/desktop
+  // (60rem) wyrazony w px sie przesuwa, wiec trzeba przeliczyc.
+  document.dispatchEvent(new CustomEvent('devlogger:fontsize', { detail: { size } }))
 }
 
 export function FontSizeSlider() {
@@ -40,8 +43,6 @@ export function FontSizeSlider() {
     updateTheme({ '--font-slider-fill': `${pct.toFixed(2)}%` })
   }, [value])
 
-  const percent = Math.round((value / DEFAULT) * 100)
-
   return (
     <div className="FontSizeSlider">
       <Slider
@@ -60,16 +61,6 @@ export function FontSizeSlider() {
         </SliderTrack>
         <Type className="FontSizeSlider_iconLarge" size={16} aria-hidden="true" />
       </Slider>
-      <button
-        type="button"
-        className="FontSizeSlider_reset"
-        onClick={() => setValue(DEFAULT)}
-        title="reset to 100%"
-        aria-label="reset font size"
-      >
-        <span className="FontSizeSlider_resetPx">{value.toFixed(1)}px</span>
-        <span className="FontSizeSlider_resetPct">{percent}%</span>
-      </button>
     </div>
   )
 }

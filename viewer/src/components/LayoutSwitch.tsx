@@ -36,7 +36,7 @@ export function LayoutSwitch({ value, onChange }: LayoutSwitchProps) {
       {ITEMS.map((item) => (
         <ToggleButton key={item.id} id={item.id} className="LayoutSwitch_button">
           <item.Icon size={13} />
-          {item.label}
+          <span className="LayoutSwitch_label">{item.label}</span>
         </ToggleButton>
       ))}
     </ToggleButtonGroup>

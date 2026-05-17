@@ -5,6 +5,10 @@
   gap: 0.4rem;
   width: 10rem;
   user-select: none;
+
+  // Slider jasnosci to "advanced config" - na telefonie brak miejsca w headerze.
+  // Wartosci persistowane w localStorage, mozna ustawic na desktopie.
+  .is-mobile & { display: none; }
 }
 
 .ThemeSlider_value {

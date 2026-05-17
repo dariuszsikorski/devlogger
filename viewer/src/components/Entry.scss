@@ -15,12 +15,26 @@
   &[data-level="warn"]  { border-left-color: var(--color-warning); }
   &[data-level="error"] { border-left-color: var(--color-alert);   }
   &[data-level="debug"] { border-left-color: var(--color-debug);   }
+
+  // Mobile: 2 rzedy. Gora = metadane (czas, level, app). Dol = body pelnej szerokosci.
+  // Inaczej sztywne 24.7rem kolumn wypycha tresc poza ekran 360px.
+  .is-mobile & {
+    grid-template-columns: auto auto 1fr;
+    grid-template-areas:
+      "time level app"
+      "body body body";
+    gap: 0.2rem 0.45rem;
+    padding: 0.3rem 0.45rem;
+    align-items: baseline;
+  }
 }
 
 .Entry_time {
   color: var(--color-text-muted);
   font-size: 0.72rem;
   font-variant-numeric: tabular-nums;
+
+  .is-mobile & { grid-area: time; font-size: 0.68rem; }
 }
 
 .Entry_level {
@@ -41,6 +55,13 @@
   .Entry[data-level="warn"]  & { color: var(--color-warning); background: oklch(from var(--color-warning) l c h / 0.16); border-color: oklch(from var(--color-warning) l c h / 0.35); }
   .Entry[data-level="error"] & { color: var(--color-alert);   background: oklch(from var(--color-alert)   l c h / 0.14); border-color: oklch(from var(--color-alert)   l c h / 0.40); }
   .Entry[data-level="debug"] & { color: var(--color-debug);   background: oklch(from var(--color-debug)   l c h / 0.12); border-color: oklch(from var(--color-debug)   l c h / 0.32); }
+
+  .is-mobile & {
+    grid-area: level;
+    font-size: 0.62rem;
+    padding: 0.12rem 0.4rem;
+    letter-spacing: 0.04em;
+  }
 }
 
 .Entry_app {
@@ -49,6 +70,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+
+  .is-mobile & {
+    grid-area: app;
+    font-size: 0.7rem;
+    min-width: 0;
+  }
 }
 
 .Entry_scope {
@@ -60,6 +87,12 @@
 .Entry_body {
   white-space: pre-wrap;
   word-break: break-word;
+
+  .is-mobile & {
+    grid-area: body;
+    font-size: 0.78rem;
+    line-height: 1.3;
+  }
 }
 
 .Entry_count {

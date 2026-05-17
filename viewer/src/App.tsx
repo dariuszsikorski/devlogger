@@ -9,6 +9,7 @@ import { Graph } from './components/Graph'
 import { GapNotice } from './components/GapNotice'
 import { useStream } from './hooks/useStream'
 import { useHeartbeat } from './hooks/useHeartbeat'
+import { useViewportClass } from './hooks/useViewportClass'
 import { useSemanticColors } from './useSemanticColors'
 import { formatArgs } from './utils/format'
 import { clearEntries, getAllEntries, putEntries } from './storage/entriesDb'
@@ -19,6 +20,7 @@ const MAX_ENTRIES = 2000
 
 export function App() {
   useSemanticColors()
+  useViewportClass()
 
   const [entries, setEntries] = useState<StreamItem[]>([])
   const [apps, setApps] = useState<string[]>([])

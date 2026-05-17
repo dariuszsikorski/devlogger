@@ -41,6 +41,15 @@
     svg { max-width: 0.92rem; max-height: 0.92rem; }
   }
 
+  // Mobile: powiekszamy guziki Controls do touch-target (~36px), zeby dalo sie
+  // wygodnie tapnac palcem zoom+/-/fit. Pozostala chromia (paddingi, kolory)
+  // dziedziczona.
+  .is-mobile & .react-flow__controls-button {
+    width: 2.4rem;
+    height: 2.4rem;
+    svg { max-width: 1.1rem; max-height: 1.1rem; }
+  }
+
   .react-flow__attribution { display: none; }
 }
 
@@ -65,6 +74,15 @@
   padding: 0.46rem 0.77rem;
   font-family: var(--font-mono);
   font-size: 0.85rem;
+
+  // Mobile: metrics zawijaja sie, mniejszy font + padding zeby nie zaslaniac canvasu.
+  .is-mobile & {
+    flex-wrap: wrap;
+    gap: 0.35rem 0.55rem;
+    padding: 0.3rem 0.45rem;
+    font-size: 0.7rem;
+    max-width: 60vw;
+  }
 }
 
 .Graph_layoutPanel {
@@ -77,6 +95,12 @@
   display: inline-flex;
   align-items: center;
   gap: 0.38rem;
+  transition: color 200ms;
+
+  // Subtelny sygnal ciszy: po przekroczeniu progu idle metric value zmienia
+  // sie na warning - tak zeby kacik oka zauwazyl ze nic sie nie dzieje, ale
+  // bez krzykliwosci. Sam label pozostaje muted.
+  &[data-stale="true"] .Graph_panelValue { color: var(--color-warning); }
 }
 
 .Graph_panelLabel {
@@ -107,6 +131,12 @@
   max-width: 27.69rem;
   color: var(--color-text-muted);
   font-size: 0.92rem;
+
+  .is-mobile & {
+    padding: 0.7rem 0.9rem;
+    font-size: 0.78rem;
+    max-width: calc(100vw - 1.5rem);
+  }
 
   p { margin: 0; }
 
@@ -140,6 +170,18 @@
   // canvas (position:relative). Z prawym tego problemu nie ma, bo jest po
   // canvasie w DOM. z-index:1 stawia oba panele NAD canvasem.
   z-index: 1;
+
+  // Mobile: lewy panel jest pusty - chowamy. Prawy ma payload-inspector
+  // (klikniecie sterty paczek), wiec zostaje, ale jako slide-over zeby nie
+  // pchal canvasu - canvas zachowuje pelna szerokosc.
+  .is-mobile &.is-left { display: none; }
+  .is-mobile &.is-right {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    --side-panel-w: min(18rem, 82vw);
+  }
 }
 
 .Graph_sidePanelContent {
@@ -177,6 +219,11 @@
   justify-content: center;
   cursor: pointer;
   transition: background 120ms, color 120ms;
+
+  // lucide-react ChevronLeft/Right ustawia inline width/height na SVG. Te
+  // atrybuty NIE skaluja sie z font-sliderem. CSS nadpisuje atrybuty
+  // prezentacyjne SVG bez !important, wiec ikona rosnie/maleje z rem.
+  svg { width: 1rem; height: 1rem; }
 
   // Toggle siedzi po stronie kanwy panelu i wystaje 100% wlasnej szerokosci
   // do srodka kanwy. Dzieki temu nawet gdy panel ma width:0 (collapsed),

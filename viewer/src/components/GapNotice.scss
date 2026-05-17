@@ -14,6 +14,16 @@
   line-height: 1.45;
   box-shadow: 0 8px 24px oklch(from var(--surface-base) clamp(0, calc(l - 0.18), 1) c h / 0.45);
   animation: GapNotice-in 200ms ease-out;
+
+  // Mobile: toast pelnej szerokosci minus marginesy, zeby nie wystawal poza
+  // ekran 360px ani nie zaslanial konkretnego sterowania w naroznikach.
+  .is-mobile & {
+    top: 0.5rem;
+    right: 0.5rem;
+    left: 0.5rem;
+    max-width: none;
+    padding: 0.6rem 2rem 0.7rem 0.75rem;
+  }
 }
 
 .GapNotice_title {
