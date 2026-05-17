@@ -434,6 +434,18 @@ Notes:
 
 Files are kept small and single-purpose to make future tests and contributions straightforward.
 
+## Programmatic control - integrating headless orchestrators
+
+The broker exposes a structured event stream (`/stream`) and accepts producer batches (`/ingest`). Both surfaces are designed so external orchestrators - CI watchers, terminal dashboards, automated agents reading the log to reason about runtime behavior - can do more than passively observe.
+
+Two patterns the API supports today:
+
+**1. Dynamic focus.** When a process emits logs from many scopes at once, an external controller can adjust visibility on the fly by calling `setEnabled`, `muteScope`, `muteLevel`, `clearMutes` through whatever RPC the producer chooses to expose. Recommended baseline: keep `info` / `warn` / `error` on globally, mute `debug` by default, and lift the mute only for the scopes currently under investigation. This keeps the terminal (and any downstream consumer) readable as the codebase grows.
+
+**2. Stream digest.** Subscribers receive every entry as `{ level, scope, args, timestamp, count }`. A consumer can filter by exec-shaped entries to extract the structured call graph (`by` / `target` from the entry args) and emit a short summary - "module A called module B, module B returned X" - without forwarding the raw stream. Useful when bandwidth or downstream context is constrained.
+
+These extension points are public on purpose. The library deliberately does not ship a controller or a digester - those belong to the orchestrator, which knows its own transport, auth, and reporting format.
+
 ## Author and license
 
 Dariusz Sikorski - https://www.dariuszsikorski.pl
