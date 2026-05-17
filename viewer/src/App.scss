@@ -10,6 +10,10 @@
 @use './components/LayoutSwitch.scss';
 @use './components/Graph.scss';
 @use './components/GapNotice.scss';
+@use './components/Dialog.scss';
+@use './components/JsonTree.scss';
+@use './components/PayloadSidebar.scss';
+@use './components/PayloadDetailDialog.scss';
 
 * { box-sizing: border-box; }
 

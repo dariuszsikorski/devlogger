@@ -1,0 +1,89 @@
+// @purpose Recursive JSON tree visuals - monospace, soft per-kind color hints,
+// gutter lines to make depth scannable in narrow sidebars.
+.JsonTree {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--color-text);
+  line-height: 1.5;
+  word-break: break-word;
+
+  &.is-compact {
+    font-size: 0.78rem;
+    line-height: 1.4;
+  }
+}
+
+.JsonTree_row,
+.JsonTree_branch {
+  display: block;
+  min-width: 0;
+}
+
+.JsonTree_row {
+  padding: 0.05rem 0 0.05rem 0.7rem;
+  white-space: pre-wrap;
+}
+
+.JsonTree_toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  padding: 0.05rem 0.2rem 0.05rem 0;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  min-width: 0;
+
+  &:hover .JsonTree_summary { color: var(--color-text); }
+  &:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 1px; border-radius: 3px; }
+}
+
+.JsonTree_chevron {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.85rem;
+  height: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.JsonTree_children {
+  margin-left: 0.55rem;
+  padding-left: 0.5rem;
+  border-left: 1px dashed var(--surface-plus-3);
+}
+
+.JsonTree_key {
+  color: var(--color-info);
+  font-weight: 500;
+}
+
+.JsonTree_colon {
+  color: var(--color-text-muted);
+  margin: 0 0.25rem 0 0.05rem;
+}
+
+.JsonTree_summary {
+  color: var(--color-text-muted);
+  font-style: italic;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.JsonTree_val {
+  word-break: break-all;
+
+  &[data-kind="string"]    { color: var(--color-success); }
+  &[data-kind="number"]    { color: var(--color-warning); }
+  &[data-kind="boolean"]   { color: var(--color-debug); }
+  &[data-kind="null"],
+  &[data-kind="undefined"] { color: var(--color-text-muted); font-style: italic; }
+  &[data-kind="function"],
+  &[data-kind="symbol"],
+  &[data-kind="bigint"]    { color: var(--color-debug); font-style: italic; }
+}

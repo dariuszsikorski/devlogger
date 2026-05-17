@@ -1,0 +1,200 @@
+// @purpose Right-side payload inspector - tight vertical list optimized for the
+// narrow sidebar width. Each item shows a compact preview; click opens dialog.
+.PayloadSidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  gap: 0.55rem;
+  margin: -0.92rem; // bleed against Graph_sidePanelContent padding so list fills
+  padding: 0.7rem 0.55rem 0.55rem;
+  color: var(--color-text);
+  font-size: 0.85rem;
+
+  &.is-empty {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+}
+
+.PayloadSidebar_hint {
+  color: var(--color-text-muted);
+  margin: 0;
+  font-size: 0.82rem;
+  padding: 0 0.4rem;
+}
+
+.PayloadSidebar_header {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--surface-minus-2);
+}
+
+.PayloadSidebar_titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.PayloadSidebar_title {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.PayloadSidebar_close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.55rem;
+  height: 1.55rem;
+  background: var(--surface-minus-1);
+  border: 1px solid var(--surface-minus-2);
+  border-radius: 0.35rem;
+  color: var(--color-text);
+  cursor: pointer;
+
+  &[data-hovered]       { background: var(--surface-plus-3); }
+  &[data-focus-visible] { outline: 2px solid var(--color-accent); outline-offset: 1px; }
+}
+
+.PayloadSidebar_route {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--color-text);
+  overflow: hidden;
+}
+
+.PayloadSidebar_routeNode {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0.05rem 0.35rem;
+  background: var(--surface-minus-1);
+  border: 1px solid var(--surface-minus-2);
+  border-radius: 0.3rem;
+}
+
+.PayloadSidebar_routeArrow {
+  flex: 0 0 auto;
+  color: var(--color-text-muted);
+}
+
+.PayloadSidebar_meta {
+  display: flex;
+  gap: 0.4rem;
+  font-size: 0.76rem;
+  color: var(--color-text-muted);
+}
+
+.PayloadSidebar_metaDim {
+  opacity: 0.7;
+}
+
+.PayloadSidebar_list {
+  flex: 1 1 auto;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.PayloadSidebar_empty {
+  padding: 0.6rem 0.4rem;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.PayloadSidebar_item {
+  display: block;
+}
+
+.PayloadSidebar_itemMain {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  background: var(--surface-minus-1);
+  border: 1px solid var(--surface-minus-2);
+  border-radius: 0.4rem;
+  padding: 0.4rem 0.45rem;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  min-width: 0;
+  transition: background 120ms, border-color 120ms;
+
+  &:hover {
+    background: var(--surface-plus-2);
+    border-color: var(--surface-plus-3);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 1px;
+  }
+}
+
+.PayloadSidebar_itemHead {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.PayloadSidebar_itemTime {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.PayloadSidebar_itemScope {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--color-info);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.PayloadSidebar_itemChevron {
+  flex: 0 0 auto;
+  color: var(--color-text-muted);
+}
+
+.PayloadSidebar_itemPreview {
+  // Limit preview height in the narrow column - long objects fully expand only
+  // in the detail dialog. Keeps the list scannable.
+  max-height: 7rem;
+  overflow: hidden;
+  position: relative;
+  // Fade tail hint for clipped content - the click target is the whole card,
+  // so users discover "more" by opening the dialog.
+  mask-image: linear-gradient(to bottom, #000 70%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 70%, transparent 100%);
+}
+
+.PayloadSidebar_noArgs {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}

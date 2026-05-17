@@ -1,7 +1,7 @@
 // @purpose Live call-chain visualization via React Flow - shows scopes, functions and call edges.
 // Layout (grouped/tree/lanes/radial) is selectable via the LayoutSwitch sub-tab bar.
 // Side panels (left/right) are collapsible shells - content can be filled by callers.
-import { useMemo, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import {
   ReactFlow,
   Background,
@@ -17,6 +17,8 @@ import { CallNode } from './CallNode'
 import { ScopeGroup } from './ScopeGroup'
 import { CallEdge } from './CallEdge'
 import { LayoutSwitch } from './LayoutSwitch'
+import { PayloadSidebar } from './PayloadSidebar'
+import { EdgeSelectionContext } from './EdgeSelectionContext'
 import { useCallGraph, type CallEdgeData } from '../hooks/useCallGraph'
 import { applyLayout, type LayoutKey } from '../layouts'
 import type { GraphNode } from '../layouts/types'
@@ -74,6 +76,32 @@ export function Graph({ entries, leftPanel, rightPanel }: GraphProps) {
   const [layoutKey, setLayoutKey] = useState<LayoutKey>('grouped')
   const [leftOpen, setLeftOpen] = useState(false)
   const [rightOpen, setRightOpen] = useState(false)
+  const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null)
+
+  // Auto-open the right panel on edge selection. We DON'T auto-close when the
+  // user picks a different edge - feels more stable. They can still toggle it.
+  const selectEdge = useCallback((id: string | null) => {
+    setSelectedEdgeId(id)
+    if (id) setRightOpen(true)
+  }, [])
+
+  const selectionValue = useMemo(
+    () => ({ selectedEdgeId, selectEdge }),
+    [selectedEdgeId, selectEdge],
+  )
+
+  // If the selected edge disappears (graph reset / gap clear), drop selection
+  // so the sidebar doesn't keep stale source/target labels.
+  useEffect(() => {
+    if (!selectedEdgeId) return
+    const stillExists = rawEdges.some((e) => e.id === selectedEdgeId)
+    if (!stillExists) setSelectedEdgeId(null)
+  }, [rawEdges, selectedEdgeId])
+
+  const selectedEdge = useMemo<Edge<CallEdgeData> | null>(
+    () => rawEdges.find((e) => e.id === selectedEdgeId) ?? null,
+    [rawEdges, selectedEdgeId],
+  )
 
   // Recompute every render so live data + layout transform stays in sync.
   // The transforms are cheap (linear in nodes/edges) so memoization keyed on
@@ -97,7 +125,14 @@ export function Graph({ entries, leftPanel, rightPanel }: GraphProps) {
     [],
   )
 
+  // External rightPanel (if provided) wins over the built-in payload inspector.
+  // Lets future callers swap in their own content without losing the toggle UI.
+  const rightContent: ReactNode = rightPanel ?? (
+    <PayloadSidebar edge={selectedEdge} onClose={() => setSelectedEdgeId(null)} />
+  )
+
   return (
+    <EdgeSelectionContext.Provider value={selectionValue}>
     <div className="Graph">
       <SidePanel side="left"  open={leftOpen}  onToggle={() => setLeftOpen((o) => !o)}>
         {leftPanel}
@@ -158,8 +193,9 @@ export function Graph({ entries, leftPanel, rightPanel }: GraphProps) {
         )}
       </div>
       <SidePanel side="right" open={rightOpen} onToggle={() => setRightOpen((o) => !o)}>
-        {rightPanel}
+        {rightContent}
       </SidePanel>
     </div>
+    </EdgeSelectionContext.Provider>
   )
 }

@@ -1,0 +1,112 @@
+// @purpose Reusable dialog chrome - overlay, panel, header, scroll body.
+// Sizes in rem so the entire dialog scales with the global font slider.
+.Dialog_overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.2rem;
+  background: oklch(from var(--surface-base) clamp(0, calc(l - 0.10), 1) c h / 0.55);
+  backdrop-filter: blur(2px);
+
+  &[data-entering] { animation: dialogFadeIn 160ms ease-out; }
+  &[data-exiting]  { animation: dialogFadeIn 140ms ease-in reverse; }
+}
+
+.Dialog_modal {
+  width: 100%;
+  max-width: 44rem;
+  max-height: calc(100vh - 2.4rem);
+  display: flex;
+
+  &[data-entering] { animation: dialogPanelIn 180ms cubic-bezier(0.22, 1, 0.36, 1); }
+}
+
+.Dialog {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--surface-plus-1);
+  border: 1px solid var(--surface-minus-3);
+  border-radius: 0.62rem;
+  box-shadow: 0 1.2rem 3rem oklch(from var(--surface-base) clamp(0, calc(l - 0.20), 1) c h / 0.55);
+  outline: none;
+  color: var(--color-text);
+}
+
+.Dialog_header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: 0.85rem 1rem 0.7rem;
+  border-bottom: 1px solid var(--surface-minus-2);
+}
+
+.Dialog_titleWrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.Dialog_title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.Dialog_subtitle {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  word-break: break-word;
+}
+
+.Dialog_close {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 0.4rem;
+  background: var(--surface-minus-1);
+  border: 1px solid var(--surface-minus-2);
+  color: var(--color-text);
+  cursor: pointer;
+
+  &[data-hovered]       { background: var(--surface-plus-3); }
+  &[data-focus-visible] { outline: 2px solid var(--color-accent); outline-offset: 1px; }
+}
+
+.Dialog_body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 0.9rem 1rem 1rem;
+}
+
+// Mobile: dialog nearly fullscreen, less padding.
+.is-mobile {
+  .Dialog_overlay { padding: 0.6rem; }
+  .Dialog_modal   { max-height: calc(100vh - 1.2rem); }
+  .Dialog_header  { padding: 0.7rem 0.8rem 0.55rem; }
+  .Dialog_body    { padding: 0.7rem 0.8rem 0.85rem; }
+}
+
+@keyframes dialogFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes dialogPanelIn {
+  from { opacity: 0; transform: translateY(0.6rem) scale(0.985); }
+  to   { opacity: 1; transform: translateY(0)      scale(1); }
+}
