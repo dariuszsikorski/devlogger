@@ -21,6 +21,11 @@ import { useCallGraph, type CallEdgeData } from '../hooks/useCallGraph'
 import { applyLayout, type LayoutKey } from '../layouts'
 import type { GraphNode } from '../layouts/types'
 import type { StreamItem } from '../types'
+import { formatGap } from '../utils/format'
+
+// Mirror of Stream.tsx GAP_THRESHOLD_MS - przy tym progu graph oznacza
+// idle:Xs jako "stale" (data-stale="true"), zeby cisza byla subtelnie widoczna.
+const GRAPH_IDLE_THRESHOLD_MS = 5000
 
 const nodeTypes = { call: CallNode, 'scope-group': ScopeGroup }
 const edgeTypes = { call: CallEdge }
@@ -80,6 +85,12 @@ export function Graph({ entries, leftPanel, rightPanel }: GraphProps) {
 
   const isEmpty = nodeCount === 0
 
+  // useCallGraph wewnetrznie tickuje co 300ms (setTick), wiec ten odczyt
+  // odswieza sie sam bez dodatkowego interval'a tutaj.
+  const lastEventAt = entries.length > 0 ? entries[entries.length - 1].entry.timestamp : 0
+  const idleMs = lastEventAt > 0 ? Date.now() - lastEventAt : 0
+  const isStale = lastEventAt > 0 && idleMs >= GRAPH_IDLE_THRESHOLD_MS
+
   const proOptions = useMemo(() => ({ hideAttribution: true }), [])
   const defaultEdgeOptions = useMemo<DefaultEdgeOptions>(
     () => ({ type: 'call', animated: false }),
@@ -123,6 +134,12 @@ export function Graph({ entries, leftPanel, rightPanel }: GraphProps) {
               <span className="Graph_panelLabel">edges</span>
               <span className="Graph_panelValue">{edgeCount}</span>
             </span>
+            {lastEventAt > 0 && (
+              <span className="Graph_panelMetric" data-stale={isStale ? 'true' : 'false'}>
+                <span className="Graph_panelLabel">idle</span>
+                <span className="Graph_panelValue">{formatGap(idleMs)}</span>
+              </span>
+            )}
           </Panel>
 
           <Panel position="top-right" className="Graph_layoutPanel">
