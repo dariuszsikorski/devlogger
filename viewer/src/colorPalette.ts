@@ -29,6 +29,22 @@ const INFO_CURVE = curve(
   [0.10,  0], [0.30, +1], [0.45, +1], [0.61,  0], [0.67, -1],
   [0.75, +1], [0.90,  0], [0.95, +2], [1.00, +1],
 )
+// Estymata 2026-05-17 wzorowana na INFO. Fiolet (H=295) jest perceptualnie
+// ciemniejszy od niebieskiego (H=245), wiec na ciemnych tlach (L<=0.45)
+// idziemy o jeden poziom wyzej niz info zeby zachowac czytelnosc i odroznienie
+// debug vs info. Na jasnych tlach (L>=0.75) o jeden ponizej info, zeby fiolet
+// nie zlewal sie z bialym i mial mocniejszy kontrast.
+const DEBUG_CURVE = curve(
+  [0.10, +1], [0.30, +2], [0.45, +1], [0.61,  0], [0.67, -1],
+  [0.75,  0], [0.90,  0], [0.95, +1], [1.00,  0],
+)
+// Accent = CTA / primary, musi wybijac sie mocniej niz info na kazdym tle.
+// Wzorowane na INFO ale z wzmocnionym kontrastem vs surface w strefach gdzie
+// info siedzi blisko bg (0.30-0.45 oraz 0.75-1.00).
+const ACCENT_CURVE = curve(
+  [0.10, +1], [0.30, +2], [0.45, +2], [0.61, +1], [0.67, -1],
+  [0.75,  0], [0.90, -1], [0.95,  0], [1.00, -1],
+)
 
 export interface SemanticColor {
   name:    string
@@ -42,9 +58,9 @@ export const PALETTE: ReadonlyArray<SemanticColor> = [
   { name: 'warning', H:  75,             deltas: WARNING_CURVE },
   { name: 'alert',   H:  25,             deltas: ALERT_CURVE   },
   { name: 'info',    H: 245,             deltas: INFO_CURVE    },
-  { name: 'debug',   H: 295,             deltas: INFO_CURVE    },
+  { name: 'debug',   H: 295,             deltas: DEBUG_CURVE   },
   { name: 'neutral', H: 255, forceS: 0,                        },
-  { name: 'accent',  H: 245,             deltas: INFO_CURVE    },
+  { name: 'accent',  H: 245,             deltas: ACCENT_CURVE  },
 ]
 
 // Step deltas used for L+/-N offset variants exposed on every color as CSS vars.
