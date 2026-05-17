@@ -1,86 +1,21 @@
-// @purpose Custom edge - metro-style path (straights + 45deg diagonals) with
-// animated in-flight packages riding along it + a static "arrived" pile at
-// the target end. In-flight packages snapshot their path so parent re-renders
-// don't restart animations. Once a package arrives, the in-flight render is
-// replaced by the pile composition (1 box for a single arrival, otherwise a
-// symbolic 3-4 stacked-package cluster).
+// @purpose Custom edge - tight bezier curve with animated in-flight packages
+// riding along it + a static "arrived" pile at the target end. In-flight
+// packages snapshot their path so parent re-renders don't restart animations.
+// Once a package arrives, the in-flight render is replaced by the pile
+// composition (1 box for a single arrival, otherwise a symbolic 3-4 stacked
+// package cluster).
 import { memo, useMemo, useRef } from 'react'
 import {
   BaseEdge,
-  Position,
+  getBezierPath,
   type EdgeProps,
   type Edge,
 } from '@xyflow/react'
 import type { CallEdgeData } from '../hooks/useCallGraph'
 
-// Metro-style path: only 0deg / 90deg straights with 45deg diagonals.
-// No bezier curves - looks technical like a transit map. Per-edge variance
-// from edge id hash shifts the diagonal junctions so parallel routes between
-// nearby nodes don't sit perfectly on top of each other.
-const METRO_MIN_STRAIGHT = 16
-const METRO_VARIANCE = 22
-
-function getMetroPath(opts: {
-  sourceX: number; sourceY: number; targetX: number; targetY: number;
-  sourcePosition: Position; targetPosition: Position; edgeId: string;
-}): [string, number, number] {
-  const { sourceX: sx, sourceY: sy, targetX: tx, targetY: ty, sourcePosition, targetPosition, edgeId } = opts
-  const dx = tx - sx
-  const dy = ty - sy
-  const adx = Math.abs(dx)
-  const ady = Math.abs(dy)
-  const sgnX = (Math.sign(dx) || 1) as 1 | -1
-  const sgnY = (Math.sign(dy) || 1) as 1 | -1
-
-  const h = hashString(edgeId)
-  const variance = (h % (METRO_VARIANCE * 2 + 1)) - METRO_VARIANCE
-
-  const srcVertical = sourcePosition === Position.Top || sourcePosition === Position.Bottom
-  const tgtVertical = targetPosition === Position.Top || targetPosition === Position.Bottom
-
-  // Vertical flow: bottom -> top handles (or vice versa). Most common in the
-  // grouped/tree layouts where nodes stack vertically inside scope groups.
-  if (srcVertical && tgtVertical) {
-    const diagLen = Math.min(adx, ady)
-    const remY = ady - diagLen
-    // Need room for initial + final straight segments before/after diagonal.
-    if (remY < METRO_MIN_STRAIGHT * 2 || diagLen < 1) {
-      // Not enough vertical headroom for a diagonal - degrade to a Z-step.
-      const midY = sy + sgnY * (ady / 2)
-      return [`M ${sx},${sy} L ${sx},${midY} L ${tx},${midY} L ${tx},${ty}`, (sx + tx) / 2, midY]
-    }
-    let initial = remY / 2 + variance
-    initial = Math.max(METRO_MIN_STRAIGHT, Math.min(remY - METRO_MIN_STRAIGHT, initial))
-    const p1y = sy + sgnY * initial
-    const diagDx = sgnX * diagLen
-    const diagDy = sgnY * diagLen
-    const p2x = sx + diagDx
-    const p2y = p1y + diagDy
-    if (diagLen === adx) {
-      // Diagonal closes the x gap entirely - one more vertical to target.
-      return [`M ${sx},${sy} L ${sx},${p1y} L ${p2x},${p2y} L ${tx},${ty}`, p2x, p2y]
-    }
-    // Diagonal closes the y/limited side - need a horizontal stub before final vertical.
-    return [`M ${sx},${sy} L ${sx},${p1y} L ${p2x},${p2y} L ${tx},${p2y} L ${tx},${ty}`, tx, p2y]
-  }
-
-  // Horizontal flow fallback (left/right handles).
-  const diagLen = Math.min(adx, ady)
-  const remX = adx - diagLen
-  if (remX < METRO_MIN_STRAIGHT * 2 || diagLen < 1) {
-    const midX = sx + sgnX * (adx / 2)
-    return [`M ${sx},${sy} L ${midX},${sy} L ${midX},${ty} L ${tx},${ty}`, midX, (sy + ty) / 2]
-  }
-  let initial = remX / 2 + variance
-  initial = Math.max(METRO_MIN_STRAIGHT, Math.min(remX - METRO_MIN_STRAIGHT, initial))
-  const p1x = sx + sgnX * initial
-  const p2x = p1x + sgnX * diagLen
-  const p2y = sy + sgnY * diagLen
-  if (diagLen === ady) {
-    return [`M ${sx},${sy} L ${p1x},${sy} L ${p2x},${p2y} L ${tx},${ty}`, p2x, p2y]
-  }
-  return [`M ${sx},${sy} L ${p1x},${sy} L ${p2x},${p2y} L ${p2x},${ty} L ${tx},${ty}`, p2x, p2y]
-}
+// React Flow default. Lower = tighter (near-straight on short edges),
+// higher = floppier. 0.25 keeps the curve organic but not loopy.
+const EDGE_CURVATURE = 0.25
 
 type CallEdgeType = Edge<CallEdgeData, 'call'>
 
@@ -205,12 +140,13 @@ function CallEdgeImpl({
   style,
   data,
 }: EdgeProps<CallEdgeType>) {
-  // Metro-style: straights + 45deg diagonals, no curves. Per-edge id variance
-  // nudges diagonal junctions so parallel routes diverge instead of overlapping.
-  const [path] = getMetroPath({
+  // Organic bezier, but with reduced curvature so connections look precise
+  // rather than over-elastic. Tighter curves also reduce visual collision
+  // between parallel edges since each one bends less aggressively.
+  const [path] = getBezierPath({
     sourceX, sourceY, sourcePosition,
     targetX, targetY, targetPosition,
-    edgeId: id,
+    curvature: EDGE_CURVATURE,
   })
 
   const hasArgs = data?.hasArgs ?? false
