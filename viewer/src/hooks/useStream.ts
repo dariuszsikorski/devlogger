@@ -87,7 +87,13 @@ export function useStream(
       const socket = new WebSocket(wsUrl)
       socketRef.current = socket
 
+      // Every handler must first verify this is STILL the active socket -
+      // forceReconnectNow() swaps socketRef synchronously and the old
+      // socket's events fire async after. Without the guard, a stale close
+      // would cascade-schedule a reconnect on top of the live connection
+      // (and a stale message handler would shovel data through a dead path).
       socket.addEventListener('open', () => {
+        if (socketRef.current !== socket) return
         reconnectAttempt = 0
         setIsConnected(true)
         armIdleWatchdog()
@@ -96,6 +102,11 @@ export function useStream(
       })
 
       socket.addEventListener('close', () => {
+        // Ignore close of a socket that was already replaced - clearing the
+        // shared idleTimer here would wipe the NEW socket's watchdog, and
+        // scheduleReconnect would queue an extra connect on top of the
+        // already-live one.
+        if (socketRef.current !== socket) return
         setIsConnected(false)
         if (idleTimer !== null) { window.clearTimeout(idleTimer); idleTimer = null }
         scheduleReconnect()
@@ -106,6 +117,7 @@ export function useStream(
       })
 
       socket.addEventListener('message', (ev) => {
+        if (socketRef.current !== socket) return
         armIdleWatchdog()
         let parsed: BatchMessage | null = null
         try { parsed = JSON.parse(ev.data as string) as BatchMessage } catch { return }

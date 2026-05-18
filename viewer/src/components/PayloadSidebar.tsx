@@ -74,10 +74,21 @@ export function PayloadSidebar({ edge, onClose }: PayloadSidebarProps) {
         )}
         {payloads.map((p) => (
           <li key={p.firedAt} className="PayloadSidebar_item" data-has-args={p.hasArgs ? 'true' : 'false'}>
-            <button
-              type="button"
+            {/* div instead of button - the preview contains a JsonTree whose
+                expand/collapse handles are themselves <button>s, and nesting
+                <button> inside <button> is invalid HTML (React DOM nesting
+                warning + hydration risk). role+tabIndex+key handler keep
+                this fully accessible as a clickable item. */}
+            <div
+              role="button"
+              tabIndex={0}
               className="PayloadSidebar_itemMain"
               onClick={() => setOpenPayloadId(p.firedAt)}
+              onKeyDown={(ev) => {
+                if (ev.key !== 'Enter' && ev.key !== ' ') return
+                ev.preventDefault()
+                setOpenPayloadId(p.firedAt)
+              }}
               aria-label="open payload details"
             >
               <div className="PayloadSidebar_itemHead">
@@ -92,7 +103,7 @@ export function PayloadSidebar({ edge, onClose }: PayloadSidebarProps) {
                   <span className="PayloadSidebar_noArgs">no args</span>
                 )}
               </div>
-            </button>
+            </div>
           </li>
         ))}
       </ul>

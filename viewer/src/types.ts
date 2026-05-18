@@ -15,6 +15,10 @@ export interface StreamItem {
   entry: LogEntry
   /** Broker-assigned monotonic id, used for dedup + resume cursor. Missing on legacy persisted items. */
   id?: number
+  /** Wall-clock time at which a replayed item was injected into the live view.
+   *  Graph animation timing keys off this so resend re-plays edge packages
+   *  identically to fresh traffic; Stream view still shows entry.timestamp. */
+  replayedAt?: number
 }
 
 export interface BatchMessage {

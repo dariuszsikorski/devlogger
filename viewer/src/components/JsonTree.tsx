@@ -65,7 +65,13 @@ function JsonNode({ value, name, depth, defaultExpandDepth }: JsonNodeProps) {
       <button
         type="button"
         className="JsonTree_toggle"
-        onClick={() => setOpen((o) => !o)}
+        onClick={(ev) => {
+          // Tree is often nested inside a clickable container (e.g.
+          // PayloadSidebar item) - stop the bubble so expanding a node
+          // doesn't ALSO open the parent's detail dialog.
+          ev.stopPropagation()
+          setOpen((o) => !o)
+        }}
         aria-expanded={open}
       >
         <span className="JsonTree_chevron">

@@ -21,6 +21,15 @@ export interface CallNodeData {
   /** Raw args of the most recent non-exec entry on this node - feeds the click-to-detail dialog. */
   lastArgs?: unknown[]
   lastTimestamp?: number
+  /** Aggregated "delivered packages" slot - one pile per node summing every
+   *  incoming arg-carrying edge. Lives INSIDE the node (top-right) so its
+   *  visibility no longer depends on SVG paint-order tricks. */
+  incomingPile?: {
+    count: number
+    isMulti: boolean
+    /** Id of the edge that most-recently delivered - click target for the slot. */
+    latestEdgeId: string
+  }
   [key: string]: unknown
 }
 
@@ -189,7 +198,10 @@ function ensureGroupNode(state: GraphState, appId: string, scope: string): strin
     width: GROUP_W,
     height: initialH,
     style: { width: GROUP_W, height: initialH },
-    selectable: true,
+    // Not interactive - purely a visual frame. selectable:true would make
+    // React Flow apply cursor:pointer to the whole group area which is
+    // misleading since clicking does nothing.
+    selectable: false,
     draggable: false,
     data: {
       appId,
@@ -354,12 +366,23 @@ function bumpNode(
   })
 }
 
-// recentFires only feeds in-flight rendering now - arrived packages are
-// drawn separately as a static pile from the persistent edge `count`. Window
-// is just past the longest possible flight (MAX_FLIGHT_MS=8000 in CallEdge)
-// so in-flight items survive their full animation before eviction.
+// recentFires feeds two consumers: (a) CallEdge in-flight rendering and
+// (b) per-target pile aggregation below. Window is just past the longest
+// possible flight (MAX_FLIGHT_MS=8000 in CallEdge) so in-flight items
+// survive their full animation before eviction. After eviction they still
+// count as arrived via the cumulative `count` field.
 const MAX_PACKAGES_PER_EDGE = 24
 const PACKAGE_VISIBLE_MS    = 9000
+
+// Flight-duration estimate - mirrors CallEdge.pathDuration but uses straight
+// line distance instead of measured bezier length. Used ONLY to decide when
+// an in-flight package has "arrived" so the receiving node's pile (rendered
+// inside CallNode) can grow in sync with the animation. ±15-20% off vs the
+// actual bezier path is fine; we further lead by ARRIVAL_LEAD_MS and the
+// per-render tick is 80ms so visible delay is sub-perceptible.
+const APPROX_PIXELS_PER_MS  = 0.125
+const APPROX_MIN_FLIGHT_MS  = 400
+const APPROX_MAX_FLIGHT_MS  = 8000
 // Stored payload buffer for the sidebar - kept generous so users can scroll
 // back through recent traffic without losing history on every fire.
 const MAX_PAYLOADS_PER_EDGE = 100
@@ -498,7 +521,10 @@ function relayoutGroups(state: GraphState): void {
 function processItem(item: StreamItem, state: GraphState): void {
   const { appId, entry } = item
   const scope = entry.scope ?? ''
-  const firedAt = entry.timestamp || Date.now()
+  // Resend path stamps replayedAt at inject time so animation gates downstream
+  // (isHot, recentFires window, CallEdge inFlightFires) treat each replayed
+  // call as fresh. Fall back to entry.timestamp for live + cold-hydrate paths.
+  const firedAt = item.replayedAt ?? (entry.timestamp || Date.now())
 
   const parsed = parseExec(entry)
 
@@ -572,7 +598,11 @@ export function useCallGraph(entries: StreamItem[]): CallGraphResult {
   }, [entries])
 
   useEffect(() => {
-    const id = window.setInterval(() => setTick((t) => t + 1), 300)
+    // 80ms tick keeps the pile in sync with package arrivals (300ms felt
+    // ~150ms late on average because pile.count only refreshes between
+    // ticks). 80ms = ~12fps which is well under the React Flow render
+    // budget and gives sub-perceptible arrival latency.
+    const id = window.setInterval(() => setTick((t) => t + 1), 80)
     return () => window.clearInterval(id)
   }, [])
 
@@ -584,13 +614,13 @@ export function useCallGraph(entries: StreamItem[]): CallGraphResult {
   // spam the console every commit. Map insertion order doesn't guarantee
   // this after reassignFnNode() inserts a new group whose child was already
   // in the map. Emit all groups first, then children, regardless of order.
-  const nodes: AnyGraphNode[] = []
+  const rawOrderedNodes: AnyGraphNode[] = []
   const childNodes: AnyGraphNode[] = []
   for (const n of stateRef.current.nodes.values()) {
-    if (n.type === 'scope-group') nodes.push(n)
+    if (n.type === 'scope-group') rawOrderedNodes.push(n)
     else childNodes.push(n)
   }
-  for (const n of childNodes) nodes.push(n)
+  for (const n of childNodes) rawOrderedNodes.push(n)
 
   const edges: Edge<CallEdgeData>[] = []
   for (const e of stateRef.current.edges.values()) {
@@ -617,6 +647,97 @@ export function useCallGraph(entries: StreamItem[]): CallGraphResult {
       },
     })
   }
+
+  // Aggregate per-target pile data so each call-node can render its own
+  // "delivered" slot in its top-right corner (see CallNode). Sums counts
+  // across every incoming arg-carrying edge, and remembers which edge
+  // delivered last so a click on the slot can open that edge's payloads.
+  //
+  // count here is ARRIVED-only - in-flight packages (still RAF-animating
+  // along the bezier) are excluded so the pile grows in lock-step with the
+  // arrival animation rather than jumping to full size at first fire.
+  const absPosOf = (id: string): { x: number; y: number } | null => {
+    const n = stateRef.current.nodes.get(id)
+    if (!n) return null
+    let x = n.position.x
+    let y = n.position.y
+    if ('parentId' in n && n.parentId) {
+      const parent = stateRef.current.nodes.get(n.parentId)
+      if (parent) {
+        x += parent.position.x
+        y += parent.position.y
+      }
+    }
+    return { x, y }
+  }
+  const pilesByTarget = new Map<string, { count: number; latestArrivedAt: number; latestEdgeId: string }>()
+  for (const e of edges) {
+    if (!e.data?.hasArgs) continue
+    const total = e.data?.count ?? 0
+    if (total <= 0) continue
+
+    const src = absPosOf(e.source)
+    const tgt = absPosOf(e.target)
+    let flightMs = APPROX_MAX_FLIGHT_MS
+    if (src && tgt) {
+      const dx = tgt.x - src.x
+      const dy = tgt.y - src.y
+      const dist = Math.sqrt(dx * dx + dy * dy)
+      flightMs = Math.min(APPROX_MAX_FLIGHT_MS, Math.max(APPROX_MIN_FLIGHT_MS, dist / APPROX_PIXELS_PER_MS))
+    }
+
+    // Pile materialises 250ms BEFORE the in-flight animation reaches the
+    // target. Compensates for two small effects that together looked like
+    // the boxes lagged: (1) the straight-line distance underestimates the
+    // bezier path, so actual flight is ~10% longer than flightMs; (2) the
+    // tick + React render cycle adds another frame or two. Lead-in keeps the
+    // pile visually in sync with the package "touching" the node. Does NOT
+    // affect the in-flight RAF animation in CallEdge - that uses its own
+    // pathDuration off the real bezier length.
+    const ARRIVAL_LEAD_MS = 250
+    const arrivedThresholdMs = Math.max(0, flightMs - ARRIVAL_LEAD_MS)
+
+    const fires = e.data?.recentFires ?? []
+    const inFlight = fires.filter((t) => now - t < arrivedThresholdMs).length
+    const arrived = Math.max(0, total - inFlight)
+    if (arrived <= 0) continue
+
+    // latestArrivedAt = the most recent fire that's already past its flight,
+    // so clicking the pile opens the payloads tied to the most recently
+    // delivered fire (not a still-flying one).
+    const arrivedFires = fires.filter((t) => now - t >= arrivedThresholdMs)
+    const latestArrivedAt = arrivedFires.length > 0
+      ? arrivedFires[arrivedFires.length - 1]
+      : (e.data?.firedAt ?? 0)
+
+    const cur = pilesByTarget.get(e.target) ?? { count: 0, latestArrivedAt: 0, latestEdgeId: '' }
+    cur.count += arrived
+    if (latestArrivedAt > cur.latestArrivedAt) {
+      cur.latestArrivedAt = latestArrivedAt
+      cur.latestEdgeId = e.id
+    }
+    pilesByTarget.set(e.target, cur)
+  }
+
+  // Clone any call-node that has incoming piles so we don't mutate state.
+  // Groups pass through untouched.
+  const nodes: AnyGraphNode[] = rawOrderedNodes.map((n) => {
+    if (n.type !== 'call') return n
+    const p = pilesByTarget.get(n.id)
+    if (!p) return n
+    const callNode = n as Node<CallNodeData>
+    return {
+      ...callNode,
+      data: {
+        ...callNode.data,
+        incomingPile: {
+          count: p.count,
+          isMulti: p.count > 1,
+          latestEdgeId: p.latestEdgeId,
+        },
+      },
+    }
+  })
 
   let fnNodeCount = 0
   for (const n of nodes) if (n.type === 'call') fnNodeCount += 1

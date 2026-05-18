@@ -3,6 +3,7 @@
   --pulse-color: var(--color-success);
   --node-border: var(--surface-minus-2);
 
+  position: relative; // anchor for .CallNode_pile (top-right delivery slot)
   background: var(--surface-plus-1);
   border: 2px solid var(--node-border);
   border-radius: 6px;
@@ -118,4 +119,36 @@
   stroke: var(--color-success);
   stroke-width: 2;
   filter: drop-shadow(0 0 4px oklch(from var(--color-success) l c h / 0.5));
+}
+
+// Delivery slot inside each receiving node. Sits in the node's top-right
+// corner like a parcel shelf - every incoming arg-carrying edge contributes
+// to this one aggregate pile. Click opens the most-recently delivering
+// edge's payloads in the right sidebar.
+.CallNode_pile {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: filter 120ms, transform 120ms;
+
+  &:hover         { filter: brightness(1.08) drop-shadow(0 0 4px oklch(from var(--color-accent) l c h / 0.5)); }
+  &:focus-visible { outline: none; filter: drop-shadow(0 0 4px var(--color-accent)); }
+
+  &[data-selected="true"] {
+    filter: drop-shadow(0 0 6px var(--color-accent));
+  }
+}
+
+.CallNode_pileSvg {
+  overflow: visible; // hover drop-shadow must not clip at the 32x32 viewbox
+  display: block;
 }

@@ -55,8 +55,13 @@ export function Stream({ items }: StreamProps) {
         const prev = i > 0 ? visible[i - 1] : null
         const gapMs = prev ? item.entry.timestamp - prev.entry.timestamp : 0
         const showGap = !isEmpty && gapMs >= GAP_THRESHOLD_MS
+        // Stable key: broker-assigned id for real items so the list survives
+        // MAX_ENTRIES trim (which splices the head and would otherwise shift
+        // every index, forcing React to remount every Entry). Demo items
+        // have no id - fall back to index since they never get trimmed.
+        const key = item.id != null ? `e-${item.id}` : `i-${i}`
         return (
-          <Fragment key={i}>
+          <Fragment key={key}>
             {showGap && (
               <div className="Stream_gap" role="separator" aria-label={`gap ${formatGap(gapMs)}`}>
                 <span className="Stream_gapLabel">{formatGap(gapMs)} silence</span>

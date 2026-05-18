@@ -29,6 +29,15 @@
     --xy-controls-button-background-color-hover-default: var(--surface-plus-3);
     --xy-controls-button-color-default:                  var(--color-text);
     --xy-controls-button-border-color-default:           var(--surface-minus-2);
+
+    // Lift the edges layer above nodes so in-flight payload packages (which
+    // live in the edges SVG and ride along the bezier path) stay visible as
+    // they cross over neighbouring CallNode/ScopeGroup frames. The edges SVG
+    // itself has pointer-events:none; only the bezier stroke accepts clicks,
+    // so node selection/dragging is unaffected. The arrived "delivery slot"
+    // pile lives INSIDE each receiving CallNode (top-right) - see .CallNode_pile.
+    .react-flow__edges { z-index: 2; }
+    .react-flow__nodes { z-index: 1; }
   }
 
   // ReactFlow Controls default = 26x26px / 4px padding / 12px svg. Konwersja

@@ -80,6 +80,10 @@ export function App() {
     // Floor at MIN_GAP so bursts don't all land in the same frame.
     const MIN_GAP = 40
     const MAX_GAP = 1200
+    // Replay runs 1.5x faster than original tempo - no real network/IO to wait
+    // for, so the user shouldn't have to sit through the original cadence.
+    // Applied to the raw gap before clamping; MIN/MAX still bound the result.
+    const REPLAY_SPEED = 1.5
     const sorted = [...fresh].sort((a, b) => a.entry.timestamp - b.entry.timestamp)
     // Clear any in-flight replay timers (subsequent Resend cancels previous).
     for (const id of replayTimersRef.current) window.clearTimeout(id)
@@ -88,11 +92,15 @@ export function App() {
     let prevTs = sorted[0].entry.timestamp
     for (let i = 0; i < sorted.length; i++) {
       const it = sorted[i]
-      const rawGap = it.entry.timestamp - prevTs
+      const rawGap = (it.entry.timestamp - prevTs) / REPLAY_SPEED
       const gap = i === 0 ? 0 : Math.max(MIN_GAP, Math.min(MAX_GAP, rawGap))
       cumDelay += gap
       prevTs = it.entry.timestamp
-      const tid = window.setTimeout(() => injectItems([it]), cumDelay)
+      // Stamp replayedAt at INJECT time (not schedule time) so the graph sees
+      // each replayed call as "just fired now" - matching the live animation
+      // gates (isHot, recentFires window, in-flight filter). Original
+      // entry.timestamp is preserved for Stream view + payload detail dialog.
+      const tid = window.setTimeout(() => injectItems([{ ...it, replayedAt: Date.now() }]), cumDelay)
       replayTimersRef.current.push(tid)
     }
   }, [injectItems])
