@@ -8,6 +8,8 @@ export type {
   LogEntry,
   ExecField,
   ExecCall,
+  ExecCallWithFn,
+  ExecCallNoFn,
   Config,
   Listener,
   TransportConfig,

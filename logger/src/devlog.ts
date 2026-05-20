@@ -1,5 +1,5 @@
 // @purpose Main factory. createDevLog([scope]) returns a callable logger with console-like methods plus exec().
-import type { ExecCall, LogLevel } from './types'
+import type { ExecCall, ExecCallNoFn, ExecCallWithFn, LogLevel } from './types'
 import { isEnabled } from './config'
 import { isLevelMuted, isScopeMuted, muteScope, unmuteScope } from './mute'
 import { buildPrefix } from './format'
@@ -16,7 +16,10 @@ export interface DevLog {
   success: (...args: unknown[]) => void
   group: (label?: unknown) => void
   groupEnd: () => void
-  exec: <TArgs extends unknown[], TReturn>(call: ExecCall<TArgs, TReturn>) => TReturn | undefined
+  // With `fn`: returns fn's value (exec returns fn's result or throws).
+  // Without `fn`: returns undefined.
+  exec<TArgs extends unknown[], TReturn>(call: ExecCallWithFn<TArgs, TReturn>): TReturn
+  exec<TArgs extends unknown[]>(call: ExecCallNoFn<TArgs>): undefined
   mute: () => void
   unmute: () => void
   readonly scope: string | null
@@ -88,7 +91,7 @@ export function createDevLog(scope?: string | null): DevLog {
     console.groupEnd()
   }
 
-  callable.exec = <TArgs extends unknown[], TReturn>(call: ExecCall<TArgs, TReturn>) => {
+  const execImpl = <TArgs extends unknown[], TReturn>(call: ExecCall<TArgs, TReturn>): TReturn | undefined => {
     if (!isEnabled()) {
       // still execute the wrapped fn so program flow is unchanged
       if (typeof call.fn === 'function') {
@@ -99,6 +102,7 @@ export function createDevLog(scope?: string | null): DevLog {
     }
     return execCall(call, scopeName, emit)
   }
+  callable.exec = execImpl as DevLog['exec']
 
   callable.mute = () => {
     if (scopeName) muteScope(scopeName)

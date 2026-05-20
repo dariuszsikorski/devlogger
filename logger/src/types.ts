@@ -28,6 +28,14 @@ export interface ExecCall<TArgs extends unknown[] = unknown[], TReturn = unknown
   ctx?: unknown
 }
 
+/** ExecCall with a required `fn`. exec() returns its value (never undefined). */
+export type ExecCallWithFn<TArgs extends unknown[], TReturn> =
+  ExecCall<TArgs, TReturn> & { fn: (...args: TArgs) => TReturn }
+
+/** ExecCall with no `fn`. exec() returns undefined. */
+export type ExecCallNoFn<TArgs extends unknown[] = unknown[]> =
+  Omit<ExecCall<TArgs, never>, 'fn'> & { fn?: undefined }
+
 export interface TransportConfig {
   /** When false, transport is fully disabled (no connect, no push). Default false. */
   enabled: boolean
