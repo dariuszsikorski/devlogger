@@ -1,6 +1,6 @@
 {
   "name": "@dariuszsikorski/devlogger",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Structured, scope-aware console logger built for LLM-readable terminal output. Works in Node.js, modern bundlers, and plain browsers.",
   "author": "Dariusz Sikorski (https://www.dariuszsikorski.pl)",
   "license": "MIT",

@@ -42,7 +42,11 @@ export interface DevLog {
   count: (label?: string) => void
   /** Native console.countReset, forwarded as-is. */
   countReset: (label?: string) => void
-  /** Native console.clear, forwarded as-is. */
+  /**
+   * Full terminal wipe: clears the visible screen, scrollback buffer, and homes
+   * the cursor (ANSI 2J + 3J + H). Falls back to native console.clear() in
+   * non-TTY environments (pipes, CI, browser). Respects `enabled` and scope mute.
+   */
   clear: () => void
 }
 
@@ -136,7 +140,23 @@ export function createDevLog(scope?: string | null): DevLog {
   callable.timeLog = passthrough('timeLog') as DevLog['timeLog']
   callable.count = passthrough('count') as DevLog['count']
   callable.countReset = passthrough('countReset') as DevLog['countReset']
-  callable.clear = passthrough('clear') as DevLog['clear']
+
+  // clear() is the only console.* method we override instead of forwarding.
+  // Why: console.clear() only wipes the visible area in most terminals; users running
+  // pipeline scripts expect scrollback to be wiped too (same behavior `cls`/`clear`
+  // give from a shell). We send ANSI 2J (clear screen) + 3J (clear scrollback)
+  // + H (home cursor). Non-TTY environments (pipes, CI, browser) fall back to
+  // native console.clear() so behavior stays sane there.
+  callable.clear = (): void => {
+    if (!isEnabled()) return
+    if (isScopeMuted(scopeName)) return
+    const out = (process as unknown as { stdout?: { isTTY?: boolean; write?: (s: string) => void } })?.stdout
+    if (out?.isTTY && typeof out.write === 'function') {
+      out.write('\x1B[2J\x1B[3J\x1B[H')
+      return
+    }
+    if (typeof console.clear === 'function') console.clear()
+  }
 
   Object.defineProperty(callable, 'scope', {
     value: scopeName,
