@@ -8,7 +8,7 @@ import { updateTheme } from './themeStyle'
 useMode(modeRgb)
 useMode(modeOkhsl)
 
-const THEME_LIGHT_THRESHOLD = 0.67
+const THEME_LIGHT_THRESHOLD = 0.75
 
 function okhslToHex(L: number, S: number, H: number): string {
   return formatHex({ mode: 'okhsl', l: L, s: S, h: H }) ?? '#000000'

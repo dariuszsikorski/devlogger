@@ -8,7 +8,7 @@ const STORAGE_KEY = 'devlogger.brightness'
 const MIN     = 0.10
 const MAX     = 1.0
 const DEFAULT = 0.18
-const THEME_LIGHT_THRESHOLD = 0.67
+const THEME_LIGHT_THRESHOLD = 0.75
 
 function readSaved(): number {
   try {
