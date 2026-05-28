@@ -114,3 +114,26 @@
   --font-ui:   ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, "Cascadia Mono", Menlo, Consolas, monospace;
 }
+
+// View Transitions API zoom animation for the UI scale rotator (ScaleCycler).
+// useScale sets --scale-vt-old-to and --scale-vt-new-from on :root just
+// before calling startViewTransition; these keyframes read them and animate
+// transform:scale() on the GPU bitmaps of the old/new layouts. No font-size
+// transition (would force a full document layout per frame). Mirrors the
+// phi/aria-kit/seller implementation 1:1.
+::view-transition-old(root) {
+  animation: phi-scale-vt-out 378ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  transform-origin: 50% 0;
+}
+::view-transition-new(root) {
+  animation: phi-scale-vt-in 378ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  transform-origin: 50% 0;
+}
+@keyframes phi-scale-vt-out {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(var(--scale-vt-old-to, 1)); }
+}
+@keyframes phi-scale-vt-in {
+  from { opacity: 0; transform: scale(var(--scale-vt-new-from, 1)); }
+  to   { opacity: 1; transform: scale(1); }
+}

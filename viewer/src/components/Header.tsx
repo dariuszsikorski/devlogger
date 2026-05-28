@@ -10,7 +10,7 @@ import {
 } from 'react-aria-components'
 import { Circle, RefreshCw, Sliders, Trash2 } from 'lucide-react'
 import { ThemeSlider } from './ThemeSlider'
-import { FontSizeSlider } from './FontSizeSlider'
+import { ScaleCycler } from './ScaleCycler'
 import { ViewSwitch, type ViewKey } from './ViewSwitch'
 
 interface HeaderProps {
@@ -45,7 +45,7 @@ export function Header({
       </div>
 
       <div className="Header_meta">
-        <FontSizeSlider />
+        <ScaleCycler />
         <ThemeSlider />
 
         <DialogTrigger>
@@ -58,8 +58,8 @@ export function Header({
             </OverlayArrow>
             <Dialog className="Header_settingsDialog" aria-label="UI settings">
               <div className="Header_settingsRow">
-                <span className="Header_settingsLabel">font size</span>
-                <FontSizeSlider />
+                <span className="Header_settingsLabel">ui scale</span>
+                <ScaleCycler />
               </div>
               <div className="Header_settingsRow">
                 <span className="Header_settingsLabel">brightness</span>

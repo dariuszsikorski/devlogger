@@ -1,9 +1,9 @@
 // @purpose Viewport detection with throttled resize - rem-aware for UI scale support.
 // Port from phi/aria-kit/shared/core/hooks/useViewportManager.ts (60rem breakpoint
-// scales z aktualnym root font-size, czyli z UI scale-em FontSizeSlider'a).
+// scales z aktualnym root font-size, czyli z UI scale-em ScaleCycler'a).
 //
-// 60rem = 960px @ 16px base; przy fontSize=13px (default devlogger) prog = 780px,
-// przy fontSize=28px (max slider) prog = 1680px. To intencja - wieksza skala UI
+// 60rem = 960px @ 16px base; przy scale=0.75 (12px) prog = 720px,
+// przy scale=2.0 (32px) prog = 1920px. To intencja - wieksza skala UI
 // = wczesniej przelaczamy na mobile layout, bo elementy zajmuja wiecej miejsca.
 //
 // Klasy lecuwa na <html> ORAZ <body> (mirror phiui-shared) - kod nadrzedny moze
@@ -20,8 +20,8 @@ export interface ViewportMode {
 }
 
 function getViewportMode(): ViewportMode {
-  // getComputedStyle czyta aktualnie zaaplikowany font-size - bez animacji na
-  // --root-font-size jest spojny z target value FontSizeSlider'a.
+  // getComputedStyle czyta aktualnie zaaplikowany font-size - useScale wpisuje
+  // dyskretny krok do <style data-slot="scale">, wiec jest spojny z target value.
   const fontSize = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16
   const widthRem = Math.round((window.innerWidth / fontSize) * 10) / 10
   return {
@@ -77,8 +77,8 @@ export function useViewportClass(): ViewportMode {
     }
 
     window.addEventListener('resize', onResize)
-    // FontSizeSlider dispatchuje 'devlogger:fontsize' przy kazdej zmianie -
-    // bez tego prog 60rem nie przeliczalby sie po przesunieciu slidera.
+    // useScale dispatchuje 'devlogger:fontsize' przy kazdej zmianie scale -
+    // bez tego prog 60rem nie przeliczalby sie po cyklu ScaleCycler'a.
     document.addEventListener('devlogger:fontsize', recompute)
     return () => {
       window.removeEventListener('resize', onResize)

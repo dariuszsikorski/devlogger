@@ -1,7 +1,7 @@
 // @purpose Root layout - importuje tokeny + komponenty, ustawia html font-size base.
 @use './tokens.scss';
 @use './components/ThemeSlider.scss';
-@use './components/FontSizeSlider.scss';
+@use './components/ScaleCycler.scss';
 @use './components/Header.scss';
 @use './components/Filters.scss';
 @use './components/Stream.scss';
@@ -18,11 +18,16 @@
 
 * { box-sizing: border-box; }
 
-html {
-  font-size: var(--root-font-size, 13px);
-}
+// html font-size is driven by useScale (injects <style data-slot="scale">
+// with `:root { font-size: Npx }` matching the active scale step). The boot
+// script in index.html sets the initial value to avoid FOUC.
 
 html, body, #root { height: 100%; }
+
+// html bg matches body bg - during the UI scale view transition the new
+// bitmap scales up from 1/ratio and briefly exposes html at viewport edges;
+// without this you'd see a black/white flash on every zoom.
+html { background: var(--surface-base); }
 
 body {
   margin: 0;

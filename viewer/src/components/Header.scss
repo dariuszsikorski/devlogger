@@ -64,7 +64,7 @@
     // ktora otwiera popover zawierajacy te same komponenty. Hide jest scoped
     // do bezposrednich dzieci .Header_meta, popover (poza tym kontenerem)
     // pokazuje je normalnie.
-    > .FontSizeSlider,
+    > .ScaleCycler,
     > .ThemeSlider { display: none; }
   }
 }
