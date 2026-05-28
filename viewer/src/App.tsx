@@ -23,9 +23,15 @@ function readPersistedLastSeenId(): number {
   try { return Number(localStorage.getItem(LAST_SEEN_ID_KEY) ?? 0) || 0 } catch { return 0 }
 }
 
+function readIsEmbed(): boolean {
+  if (typeof window === 'undefined') return false
+  try { return new URLSearchParams(window.location.search).get('embed') === '1' } catch { return false }
+}
+
 export function App() {
   useSemanticColors()
   useViewportClass()
+  const isEmbed = readIsEmbed()
 
   const [entries, setEntries] = useState<StreamItem[]>([])
   const [apps, setApps] = useState<string[]>([])
@@ -180,7 +186,15 @@ export function App() {
     setGapLastBeatAt(null)
   }, [])
 
-  const isGraph = view === 'graph'
+  const isGraph = view === 'graph' || isEmbed
+
+  if (isEmbed) {
+    return (
+      <div className="App is-embed">
+        <Graph entries={entries} />
+      </div>
+    )
+  }
 
   return (
     <div className="App">
