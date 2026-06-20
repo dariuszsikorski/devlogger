@@ -109,3 +109,46 @@
   font-size: 0.72rem;
   margin-left: 0.25rem;
 }
+
+// Structured args rendered as key/value chips - readable at a glance in the Stream.
+.Entry_body[data-chips] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2rem 0.4rem;
+}
+
+.Entry_msg {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+// contents: let each Entry_pair become a direct flex item of the body so chips
+// wrap individually instead of as one inseparable block.
+.Entry_kv { display: contents; }
+
+.Entry_pair {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.2rem;
+  max-width: 100%;
+  min-width: 0;
+  padding: 0.02rem 0.45rem;
+  border-radius: 999px;
+  background: var(--surface-plus-2);
+  border: 1px solid var(--surface-minus-2);
+  font-size: 0.8rem;
+}
+
+.Entry_k {
+  color: var(--color-text-muted);
+  white-space: nowrap;
+
+  &::after { content: '='; opacity: 0.5; margin-left: 0.15rem; }
+}
+
+.Entry_v {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}

@@ -42,8 +42,10 @@ interface BufferedItem {
 
 interface IngestMessage {
   v: 1
-  type: 'batch'
-  items: Array<{ v: 1; appId: string; entry: unknown }>
+  type: 'batch' | 'clear'
+  items?: Array<{ v: 1; appId: string; entry: unknown }>
+  /** clear only: null = wipe all, scope name = wipe just that scope. */
+  scope?: string | null
 }
 
 interface ConsumerMessage {
@@ -100,7 +102,28 @@ app.get('/ingest', { websocket: true }, (socket /* WebSocket */, _req) => {
   socket.on('message', (raw) => {
     let parsed: IngestMessage | null = null
     try { parsed = JSON.parse(raw.toString()) as IngestMessage } catch { return }
-    if (!parsed || parsed.type !== 'batch' || !Array.isArray(parsed.items)) return
+    if (!parsed) return
+
+    // Control frame: wipe the viewer (and drop matching items from the ring
+    // buffer so a later resume / reconnect does not replay what was cleared).
+    if (parsed.type === 'clear') {
+      const scope = parsed.scope ?? null
+      if (scope === null) {
+        buffer.length = 0
+      } else {
+        for (let i = buffer.length - 1; i >= 0; i--) {
+          const e = buffer[i].entry as { scope?: string | null }
+          if (e && e.scope === scope) buffer.splice(i, 1)
+        }
+      }
+      const clearPayload = JSON.stringify({ v: 1, type: 'clear', scope })
+      for (const c of consumers) {
+        try { c.send(clearPayload) } catch { /* ignore */ }
+      }
+      return
+    }
+
+    if (parsed.type !== 'batch' || !Array.isArray(parsed.items)) return
 
     const stamped: BufferedItem[] = []
     for (const raw of parsed.items) {

@@ -28,3 +28,13 @@ export interface BatchMessage {
   /** True when this batch is the broker replaying buffered items (resume / Resend button). */
   replayed?: boolean
 }
+
+/** Broker -> viewer control frame: wipe the screen (all, or one scope). */
+export interface ClearMessage {
+  v: 1
+  type: 'clear'
+  /** null = clear everything; a scope name = clear only that scope's lines. */
+  scope: string | null
+}
+
+export type ServerMessage = BatchMessage | ClearMessage

@@ -5,10 +5,34 @@ export function formatTime(ts: number): string {
   return `${d.toTimeString().slice(0, 8)}.${ms}`
 }
 
+// Render a value as compact, readable text instead of raw JSON. Top-level objects
+// become flat `key=value` pairs (no braces/quotes); nested ones get `{...}`. Depth
+// is capped so deep/circular structures can't blow up the inline row - the full
+// object is still available in the detail dialog's JsonTree on click.
+export function formatValue(v: unknown, depth: number): string {
+  if (v === null) return 'null'
+  if (v === undefined) return 'undefined'
+  const t = typeof v
+  if (t === 'string') return v as string
+  if (t === 'number' || t === 'boolean' || t === 'bigint') return String(v)
+  if (t === 'function') return 'fn'
+  if (Array.isArray(v)) {
+    if (depth >= 2) return '[...]'
+    return '[' + v.map((x) => formatValue(x, depth + 1)).join(', ') + ']'
+  }
+  if (t === 'object') {
+    if (depth >= 2) return '{...}'
+    const obj = v as Record<string, unknown>
+    const inner = Object.keys(obj).map((k) => `${k}=${formatValue(obj[k], depth + 1)}`).join(' ')
+    return depth === 0 ? inner : `{${inner}}`
+  }
+  return String(v)
+}
+
 export function formatArgs(args: unknown[]): string {
   return args.map((a) => {
     if (typeof a === 'string') return a
-    try { return JSON.stringify(a) } catch { return String(a) }
+    try { return formatValue(a, 0) } catch { return String(a) }
   }).join(' ')
 }
 

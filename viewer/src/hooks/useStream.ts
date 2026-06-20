@@ -4,13 +4,15 @@
 // We force-reconnect on visibilitychange/online when readyState != OPEN, and a 40s idle watchdog
 // tears down silent sockets so the next reconnect actually happens.
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { BatchMessage, StreamItem } from '../types'
+import type { ServerMessage, StreamItem } from '../types'
 
 const IDLE_TIMEOUT_MS = 40_000
 const MAX_BACKOFF_MS = 15_000
 
 interface UseStreamOpts {
   getLastSeenId: () => number
+  /** Broker asked the viewer to wipe its screen. null = all, scope = just that scope. */
+  onClear?: (scope: string | null) => void
 }
 
 interface UseStreamResult {
@@ -33,6 +35,8 @@ export function useStream(
   onBatchRef.current = onBatch
   const getLastSeenIdRef = useRef(opts.getLastSeenId)
   getLastSeenIdRef.current = opts.getLastSeenId
+  const onClearRef = useRef(opts.onClear)
+  onClearRef.current = opts.onClear
   const socketRef = useRef<WebSocket | null>(null)
 
   useEffect(() => {
@@ -119,11 +123,17 @@ export function useStream(
       socket.addEventListener('message', (ev) => {
         if (socketRef.current !== socket) return
         armIdleWatchdog()
-        let parsed: BatchMessage | null = null
-        try { parsed = JSON.parse(ev.data as string) as BatchMessage } catch { return }
-        const isValidBatch = parsed && parsed.type === 'batch' && Array.isArray(parsed.items)
+        let parsed: ServerMessage | null = null
+        try { parsed = JSON.parse(ev.data as string) as ServerMessage } catch { return }
+        if (!parsed) return
+        // Control frame: broker told us to wipe the screen (all, or one scope).
+        if (parsed.type === 'clear') {
+          onClearRef.current?.(parsed.scope ?? null)
+          return
+        }
+        const isValidBatch = parsed.type === 'batch' && Array.isArray(parsed.items)
         if (!isValidBatch) return
-        onBatchRef.current(parsed!.items, { isReplay: parsed!.replayed === true })
+        onBatchRef.current(parsed.items, { isReplay: parsed.replayed === true })
       })
     }
 

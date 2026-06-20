@@ -5,7 +5,8 @@ import { getConfig } from './config'
 interface TransportState {
   socket: WebSocket | null
   status: 'idle' | 'connecting' | 'open' | 'closed'
-  buffer: OutgoingEntry[]
+  /** Single ordered outbox so control frames keep their position relative to logs. */
+  buffer: Outgoing[]
   reconnectAttempt: number
   reconnectTimer: ReturnType<typeof setTimeout> | null
   flushTimer: ReturnType<typeof setTimeout> | null
@@ -17,6 +18,20 @@ interface OutgoingEntry {
   appId: string
   entry: LogEntry
 }
+
+/** Out-of-band control message (not a log entry) - e.g. wipe the viewer screen. */
+interface ControlFrame {
+  v: 1
+  type: 'clear'
+  /** null = clear everything; a scope name = clear only that scope's lines. */
+  scope: string | null
+  appId: string
+}
+
+/** One slot in the ordered outbox - either a log entry or a control frame. */
+type Outgoing =
+  | { kind: 'entry'; item: OutgoingEntry }
+  | { kind: 'control'; frame: ControlFrame }
 
 const MAX_BUFFER = 500
 const FLUSH_MS = 16
@@ -116,13 +131,30 @@ function flush(): void {
   if (!sock || state.status !== 'open') return
   if (state.buffer.length === 0) return
 
-  const batch = state.buffer.splice(0, state.buffer.length)
-  try {
-    sock.send(JSON.stringify({ v: 1, type: 'batch', items: batch }))
-  } catch {
-    // re-queue on send failure (drop newest if overflow)
-    const merged = batch.concat(state.buffer)
-    state.buffer = merged.slice(-MAX_BUFFER)
+  // Walk the outbox in call order, coalescing runs of consecutive log entries
+  // into one batch and sending each control frame on its own. This preserves
+  // ordering: clear() before any logs wipes first; after logs wipes last.
+  const out = state.buffer.splice(0, state.buffer.length)
+  let i = 0
+  while (i < out.length) {
+    const slot = out[i]
+    try {
+      if (slot.kind === 'entry') {
+        const items: OutgoingEntry[] = []
+        while (i < out.length && out[i].kind === 'entry') {
+          items.push((out[i] as { kind: 'entry'; item: OutgoingEntry }).item)
+          i++
+        }
+        sock.send(JSON.stringify({ v: 1, type: 'batch', items }))
+      } else {
+        sock.send(JSON.stringify(slot.frame))
+        i++
+      }
+    } catch {
+      // re-queue everything not yet sent, keeping order (drop oldest on overflow)
+      state.buffer = out.slice(i).concat(state.buffer).slice(-MAX_BUFFER)
+      return
+    }
   }
 }
 
@@ -136,7 +168,27 @@ export function push(entry: LogEntry): void {
   if (state.buffer.length >= MAX_BUFFER) {
     state.buffer.shift() // drop oldest
   }
-  state.buffer.push(item)
+  state.buffer.push({ kind: 'entry', item })
+
+  if (state.status === 'idle' || state.status === 'closed') connect()
+  if (state.status === 'open') scheduleFlush()
+}
+
+/**
+ * Public: ship an out-of-band control frame (currently only `clear`) to the broker,
+ * which relays it to every connected viewer. Fire-and-forget like push():
+ * sends immediately when the socket is open (after flushing pending logs so the
+ * wipe lands last), otherwise queues it and connects.
+ */
+export function sendControl(input: { type: 'clear'; scope: string | null }): void {
+  const cfg = getConfig().transport
+  if (!cfg.enabled || !cfg.url) return
+
+  const frame: ControlFrame = { v: 1, type: input.type, scope: input.scope, appId: getAppId() }
+
+  // Enqueue in call order so it ships relative to surrounding logs (see flush()).
+  if (state.buffer.length >= MAX_BUFFER) state.buffer.shift()
+  state.buffer.push({ kind: 'control', frame })
 
   if (state.status === 'idle' || state.status === 'closed') connect()
   if (state.status === 'open') scheduleFlush()

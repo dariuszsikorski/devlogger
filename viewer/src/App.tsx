@@ -111,7 +111,29 @@ export function App() {
     }
   }, [injectItems])
 
-  const { isConnected, resend } = useStream(onBatch, { getLastSeenId: () => lastSeenIdRef.current })
+  // Broker -> viewer wipe (triggered by a producer calling devLog.clear()).
+  // scope === null clears everything; a scope name clears only that scope's lines.
+  const handleRemoteClear = useCallback((scope: string | null) => {
+    if (scope === null) {
+      setEntries([])
+      seenIdsRef.current = new Set()
+      lastSeenIdRef.current = 0
+      try { localStorage.removeItem(LAST_SEEN_ID_KEY) } catch { /* ignore */ }
+      void clearEntries()
+      return
+    }
+    setEntries((prev) => {
+      const next = prev.filter((it) => it.entry.scope !== scope)
+      // Rewrite IDB to match the filtered set so a reload doesn't resurrect them.
+      void clearEntries().then(() => putEntries(next))
+      return next
+    })
+  }, [])
+
+  const { isConnected, resend } = useStream(onBatch, {
+    getLastSeenId: () => lastSeenIdRef.current,
+    onClear: handleRemoteClear,
+  })
 
   useEffect(() => {
     return () => {

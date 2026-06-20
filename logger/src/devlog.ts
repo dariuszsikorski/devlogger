@@ -5,6 +5,10 @@ import { isLevelMuted, isScopeMuted, muteScope, unmuteScope } from './mute'
 import { buildPrefix } from './format'
 import { record } from './throttle'
 import { execCall } from './exec'
+import { sendControl } from './transport'
+
+/** Scope names must stay short so terminal/viewer lines stay readable. */
+const MAX_SCOPE_LENGTH = 25
 
 export interface DevLog {
   (...args: unknown[]): void
@@ -43,9 +47,12 @@ export interface DevLog {
   /** Native console.countReset, forwarded as-is. */
   countReset: (label?: string) => void
   /**
-   * Full terminal wipe: clears the visible screen, scrollback buffer, and homes
-   * the cursor (ANSI 2J + 3J + H). Falls back to native console.clear() in
-   * non-TTY environments (pipes, CI, browser). Respects `enabled` and scope mute.
+   * Clears BOTH surfaces. Terminal: full wipe - visible screen, scrollback, home
+   * cursor (ANSI 2J + 3J + H), falling back to native console.clear() off-TTY.
+   * Viewer (over transport): scope-aware - an unscoped logger (`createDevLog()`/
+   * default `devLog`) clears EVERYTHING; a scoped logger (`createDevLog('Auth')`)
+   * clears only its own scope's lines. The terminal is linear so it always wipes
+   * fully regardless of scope. Respects `enabled` and scope mute.
    */
   clear: () => void
 }
@@ -57,6 +64,15 @@ export interface DevLog {
  */
 export function createDevLog(scope?: string | null): DevLog {
   const scopeName = scope ?? null
+
+  // Guard: reject over-long scope names at creation time. We console.error first
+  // (so the offending scope is unmissable in the terminal - no hunting) and then
+  // throw, forcing the developer to shorten it rather than silently truncating.
+  if (scopeName !== null && scopeName.length > MAX_SCOPE_LENGTH) {
+    const msg = `[devlogger] scope name too long: "${scopeName}" (${scopeName.length} chars, max ${MAX_SCOPE_LENGTH}). Shorten it.`
+    console.error(msg)
+    throw new Error(msg)
+  }
 
   const emit = (level: LogLevel, sc: string | null, args: unknown[], suffix?: string): void => {
     if (!isEnabled()) return
@@ -150,6 +166,10 @@ export function createDevLog(scope?: string | null): DevLog {
   callable.clear = (): void => {
     if (!isEnabled()) return
     if (isScopeMuted(scopeName)) return
+    // Viewer wipe (scope-aware): scoped logger clears its scope, unscoped clears all.
+    // No-op when transport is disabled. The viewer is a passive listener of devlogger.
+    sendControl({ type: 'clear', scope: scopeName })
+    // Terminal wipe - linear, can't be scoped, so it clears the whole screen.
     const out = (process as unknown as { stdout?: { isTTY?: boolean; write?: (s: string) => void } })?.stdout
     if (out?.isTTY && typeof out.write === 'function') {
       out.write('\x1B[2J\x1B[3J\x1B[H')
