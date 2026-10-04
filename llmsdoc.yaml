@@ -1,0 +1,9 @@
+# devlogger - structured, scope-aware logger for LLM-readable terminal output (dependency of directiv and phi).
+intro:
+  - devlogger = one import for Node, bundlers and browsers; package @dariuszsikorski/devlogger. Source in logger/src, build via tsup.
+  - "Usage convention: const log = createDevLog('<file>'); log.exec({ by, target, args, fn }) at module/handler/state boundaries."
+  - "viewer/ = live call-graph viewer in the browser (dev.mjs); simulation/ = demo traffic. Tests: logger/selftest.mjs."
+  - "Consumers import it as file:../devlogger (directiv) - keep the public API stable; a breaking change needs every consumer updated."
+ignore:
+  - dist
+  - "*.png"
